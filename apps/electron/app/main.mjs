@@ -25,7 +25,7 @@ let mainWindow
 let hostOutput = ''
 let hostReady = false
 let quitting = false
-const releasesURL = 'https://github.com/lucaslus/deepseek-harness-desktop/releases'
+const releasesURL = 'https://github.com/lucaslus/dsh-desktop/releases'
 
 function harnessDirectory() {
   return app.isPackaged

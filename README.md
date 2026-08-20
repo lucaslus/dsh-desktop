@@ -11,7 +11,7 @@ DeepSeek Harness Desktop is a macOS desktop app for [DeepSeek Harness](https://g
 
 ## Install on macOS
 
-Download the matching **DMG** from [GitHub Releases](https://github.com/lucaslus/deepseek-harness-desktop/releases): choose **arm64** for Apple Silicon (M-series) Macs or **x64** for Intel Macs. Open it, then drag **DeepSeek Harness** into **Applications**. Because this project does not use an Apple Developer certificate, macOS may require a first-time Control-click → **Open** confirmation. Once installed, Spotlight, Finder, and the Dock can find it normally.
+Download the matching **DMG** from [GitHub Releases](https://github.com/lucaslus/dsh-desktop/releases): choose **arm64** for Apple Silicon (M-series) Macs or **x64** for Intel Macs. Open it, then drag **DeepSeek Harness** into **Applications**. Because this project does not use an Apple Developer certificate, macOS may require a first-time Control-click → **Open** confirmation. Once installed, Spotlight, Finder, and the Dock can find it normally.
 
 Use **Check for Updates…** in the app menu to open GitHub Releases, download the matching newer DMG, and replace the copy in Applications.
 
