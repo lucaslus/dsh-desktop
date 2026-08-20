@@ -30,12 +30,13 @@ DeepSeek Harness Desktop 是 [DeepSeek Harness](https://github.com/deepseek-ai/d
 在安装 Node.js 24+ 的 macOS 上运行：
 
 ```sh
-git clone https://github.com/lucaslus/deepseek-harness-desktop.git
-cd deepseek-harness-desktop
+git clone https://github.com/lucaslus/dsh-desktop.git
+cd dsh-desktop
 corepack enable
 pnpm install --frozen-lockfile
 pnpm run build
 node apps/electron/scripts/package-mac.mjs
+open "apps/electron/dist/release/DeepSeek Harness-0.0.3-$(node -p 'process.arch').dmg"
 ```
 
 产物在 `apps/electron/dist/release/` 中。DMG 用于手动安装，ZIP 是备用压缩包。所有构建均不签名，Gatekeeper 提示及首次 Control-click → **打开** 确认属于正常现象。

@@ -38,8 +38,8 @@ image URLs.
 On macOS with Node.js 24+:
 
 ```sh
-git clone https://github.com/lucaslus/deepseek-harness-desktop.git
-cd deepseek-harness-desktop
+git clone https://github.com/lucaslus/dsh-desktop.git
+cd dsh-desktop
 corepack enable
 pnpm install --frozen-lockfile
 pnpm run build
