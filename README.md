@@ -9,6 +9,16 @@ DeepSeek Harness Desktop is a macOS desktop app for [DeepSeek Harness](https://g
 
 ![DeepSeek Harness Desktop](docs/images/deepseek-harness-desktop-hero.png)
 
+## Key enhancements
+
+DeepSeek Harness Desktop brings native desktop ergonomics and usability improvements while maintaining 100% compatibility with upstream DeepSeek Harness:
+
+- 🖥️ **Native macOS app & zero-config setup**: One-click DMG installation with bundled runtime—no terminal commands, git clone, or Node.js environment configuration required.
+- 🔍 **Model search & instant filtering**: Real-time search with smooth 10px rounded corners directly inside the Model Selector dropdown, making it effortless to find and switch models across dozens of configured providers.
+- 🎨 **Curated provider brand icons**: Bundled, offline vector brand icons (DeepSeek, OpenAI, Anthropic, Kimi / Moonshot AI, Qwen, MiniMax, Groq, Mistral, etc.) displayed consistently in Settings, the composer model picker, and `/model`.
+- ⚡ **CLI to PATH installation**: One-click setup in General Settings to link the `dsh` CLI directly to `~/.local/bin` for system-wide terminal usage.
+- 🧩 **Plugin ecosystem & balance monitoring**: Seamlessly supports custom Cordis plugins, including the companion [dsh-balance-plugin](https://github.com/lucaslus/dsh-balance-plugin) to monitor API quotas, token balances, and costs in the desktop UI.
+
 ## Install on macOS
 
 Download the matching **DMG** from [GitHub Releases](https://github.com/lucaslus/dsh-desktop/releases): choose **arm64** for Apple Silicon (M-series) Macs or **x64** for Intel Macs. Open it, then drag **DeepSeek Harness** into **Applications**. Because this project does not use an Apple Developer certificate, macOS may require a first-time Control-click → **Open** confirmation. Once installed, Spotlight, Finder, and the Dock can find it normally.

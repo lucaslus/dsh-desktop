@@ -9,6 +9,16 @@ DeepSeek Harness Desktop 是 [DeepSeek Harness](https://github.com/deepseek-ai/d
 
 ![DeepSeek Harness Desktop](docs/images/deepseek-harness-desktop-hero.png)
 
+## 核心新增能力
+
+DeepSeek Harness Desktop 在保持与官方 DeepSeek Harness 100% 架构兼容的同时，针对桌面端交互与易用性做了全方位增强：
+
+- 🖥️ **原生 macOS 应用与零配置开箱即用**：提供一键安装的 DMG 镜像，内置完整的 Node.js 运行时，用户无需打开终端、无需安装 Node/pnpm 即可直接使用。
+- 🔍 **模型搜索与实时快速过滤**：在聊天输入框的模型下拉选择面板中内置无边框搜索框与 10px 柔和圆角，轻松在数十个 Provider 和大量模型中秒级过滤与切换。
+- 🎨 **内置精选 Provider 品牌图标**：内置离线矢量品牌图标（DeepSeek、OpenAI、Anthropic、Kimi / 月之暗面、通义千问、MiniMax、Groq、Mistral 等），在设置页、输入框和 `/model` 统一提供清晰的视觉识别。
+- ⚡ **一键安装 CLI 到系统 PATH**：在通用设置中提供一键将 `dsh` 命令行工具软链接至 `~/.local/bin` 的能力，方便在独立终端中随时唤起命令行。
+- 🧩 **生态插件开箱即用与余额监控**：完美支持 Cordis 插件体系，可无缝配合配套开发的 [dsh-balance-plugin](https://github.com/lucaslus/dsh-balance-plugin) 插件，在桌面端实时查看各模型提供方的 API 额度、Token 余额与调用消耗。
+
 ## 在 macOS 安装
 
 从 [GitHub Releases](https://github.com/lucaslus/dsh-desktop/releases) 下载对应架构的 **DMG**：Apple Silicon（M 系列）选择 **arm64**，Intel Mac 选择 **x64**。打开后将 **DeepSeek Harness** 拖进 **Applications**。项目不使用 Apple Developer 证书，因此 macOS 首次打开可能需要 Control-click → **打开** 确认；之后可通过 Finder、Spotlight 和 Dock 正常使用。
