@@ -51,7 +51,7 @@ jobs:
           /usr/libexec/PlistBuddy -c 'Print :CFBundleIconFile' apps/desktop/build/DSH.app/Contents/Info.plist
 
       - name: Upload desktop app for review
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: DSH-macos-arm64
           path: apps/desktop/build/DSH.app
