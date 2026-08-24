@@ -104,7 +104,7 @@ describe('SidebarRoot shell', () => {
     />)
 
     expect(screen.getByText('DSH Desktop')).toBeTruthy()
-    expect(screen.getByText('0123456')).toBeTruthy()
+    expect(screen.queryByText('0123456')).toBeNull()
     expect(container.querySelector('svg')).not.toBeNull()
   })
 

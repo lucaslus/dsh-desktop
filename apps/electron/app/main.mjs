@@ -72,7 +72,7 @@ function startHost() {
   host = spawn(process.execPath, [
     '--expose-internals',
     ...development ? ['--import', 'tsx/esm'] : [],
-    entry, 'web', '--port', '0',
+    entry, 'web', '--no-open', '--port', '0',
   ], {
     cwd: development ? sourceHarnessWorkingDirectory() : harnessWorkingDirectory(),
     env: {

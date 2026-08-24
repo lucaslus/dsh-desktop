@@ -142,11 +142,6 @@ exports[`sidebar shell snapshots > renders the expanded column (wordmark, capsul
               >
                 DSH Desktop
               </span>
-              <span
-                class="buildRevision"
-              >
-                abc1234
-              </span>
             </div>
           </span>
         </span>
@@ -267,11 +262,6 @@ exports[`sidebar shell snapshots > renders the expanded column in the default lo
                 class="fallbackBrandName"
               >
                 DSH Desktop
-              </span>
-              <span
-                class="buildRevision"
-              >
-                abc1234
               </span>
             </div>
           </span>
