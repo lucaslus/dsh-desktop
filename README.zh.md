@@ -1,7 +1,4 @@
-<h1 align="center">
-  <img src="docs/images/deepseek-harness-desktop-icon.png" alt="DeepSeek Harness Desktop" width="42" valign="middle">
-  DeepSeek Harness Desktop
-</h1>
+# DeepSeek Harness Desktop
 
 [English](README.md) | 中文
 
@@ -61,7 +58,7 @@ open "apps/electron/dist/release/DeepSeek Harness-0.0.3-$(node -p 'process.arch'
 
 ## 开发
 
-请阅读[开发指南](docs/development.md)和[架构文档](docs/architecture.md)。面向 agent，请遵循 [AGENTS.md](AGENTS.md)。
+请阅读[开发指南](docs/development.zh.md)和[架构文档](docs/architecture.zh.md)。面向 agent，请遵循 [AGENTS.md](AGENTS.md)。
 
 开发 Electron 桌面端可在仓库根目录运行 `pnpm run dev:electron`。客户端改动会热更新；Electron、Host 与 Web shell 的源码改动会自动重启开发窗口。
 

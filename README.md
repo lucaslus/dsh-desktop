@@ -1,7 +1,4 @@
-<h1 align="center">
-  <img src="docs/images/deepseek-harness-desktop-icon.png" alt="DeepSeek Harness Desktop" width="42" valign="middle">
-  DeepSeek Harness Desktop
-</h1>
+# DeepSeek Harness Desktop
 
 English | [中文](README.zh.md)
 
