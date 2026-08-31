@@ -5,7 +5,8 @@ import { app, BrowserWindow, Menu, dialog, shell } from 'electron'
 
 const readinessPattern = /dsh web: (http:\/\/127\.0\.0\.1:\d+)/
 const development = process.env.DSH_ELECTRON_DEV === '1'
-const desktopChromeScript = `
+const macOS = process.platform === 'darwin'
+const macOSChromeScript = `
   (() => {
     document.documentElement.style.setProperty('--dsh-sidebar-logo-row-content-offset', '12px');
     const id = 'dsh-electron-titlebar-drag-region';
@@ -107,12 +108,16 @@ function stopHost() {
 }
 
 async function openReleases() {
+  const installer = process.platform === 'linux' ? 'RPM package' : 'DMG'
+  const destination = process.platform === 'linux'
+    ? 'install it with dnf'
+    : 'replace the app in Applications'
   const { response } = await dialog.showMessageBox({
     type: 'info',
     buttons: ['Open GitHub Releases', 'Cancel'],
     defaultId: 0,
     title: 'Install updates manually',
-    message: 'Download the matching DMG from GitHub Releases, then replace the app in Applications.',
+    message: `Download the matching ${installer} from GitHub Releases, then ${destination}.`,
   })
   if (response === 0) await shell.openExternal(releasesURL)
 }
@@ -121,34 +126,44 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1240, height: 820, minWidth: 900, minHeight: 600,
     title: 'DeepSeek Harness', backgroundColor: '#1b1b1c',
-    // Match the native AppKit shell: content fills the transparent title bar,
-    // the traffic lights stay native, and no duplicate window title is shown.
-    titleBarStyle: 'hiddenInset',
+    ...(macOS ? {
+      // Content fills the transparent title bar while the native traffic
+      // lights remain available. Linux retains its desktop-managed title bar.
+      titleBarStyle: 'hiddenInset',
+    } : {}),
     webPreferences: { contextIsolation: true, nodeIntegration: false, sandbox: true },
   })
-  mainWindow.webContents.on('dom-ready', () => {
-    void mainWindow?.webContents.executeJavaScript(desktopChromeScript).catch(error => {
-      console.error('Could not apply desktop window chrome:', error)
+  if (macOS) {
+    mainWindow.webContents.on('dom-ready', () => {
+      void mainWindow?.webContents.executeJavaScript(macOSChromeScript).catch(error => {
+        console.error('Could not apply desktop window chrome:', error)
+      })
     })
-  })
+  }
   void mainWindow.loadFile(join(import.meta.dirname, 'splash.html'))
+}
+
+function applicationMenu() {
+  const updateItem = { label: 'Check for Updates…', click: () => void openReleases() }
+  const applicationItems = [
+    { role: 'about' }, { type: 'separator' }, updateItem,
+    { type: 'separator' }, { role: 'quit' },
+  ]
+  const fileItems = [updateItem, { type: 'separator' }, { role: 'quit' }]
+
+  return [
+    macOS
+      ? { label: 'DeepSeek Harness', submenu: applicationItems }
+      : { label: 'File', submenu: fileItems },
+    { role: 'editMenu' }, { role: 'viewMenu' }, { role: 'windowMenu' },
+  ]
 }
 
 app.whenReady().then(() => {
   try {
     createWindow()
     startHost()
-    Menu.setApplicationMenu(Menu.buildFromTemplate([
-      {
-        label: 'DeepSeek Harness',
-        submenu: [
-          { role: 'about' }, { type: 'separator' },
-          { label: 'Check for Updates…', click: () => void openReleases() },
-          { type: 'separator' }, { role: 'quit' },
-        ],
-      },
-      { role: 'editMenu' }, { role: 'viewMenu' }, { role: 'windowMenu' },
-    ]))
+    Menu.setApplicationMenu(Menu.buildFromTemplate(applicationMenu()))
   } catch (error) {
     void dialog.showMessageBox({ type: 'error', title: 'DeepSeek Harness could not start', message: String(error) })
   }

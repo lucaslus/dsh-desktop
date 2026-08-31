@@ -1,10 +1,9 @@
 import { spawn } from 'node:child_process'
 import { join } from 'node:path'
+import { createPackagePlan } from './package-plan.mjs'
 
 const arch = process.argv[2] ?? process.arch
-if (!['arm64', 'x64'].includes(arch)) {
-  throw new Error(`Unsupported macOS architecture: ${arch}`)
-}
+const plan = createPackagePlan('darwin', arch)
 
 const electronDirectory = join(import.meta.dirname, '..')
 
@@ -16,12 +15,13 @@ function run(command, args, env = process.env) {
   })
 }
 
-await run(process.execPath, ['scripts/stage-runtime.mjs', arch])
+await run(process.execPath, plan.stageArguments)
 
 // Public DMGs are intentionally unsigned. Disable keychain discovery so a
 // developer's unrelated local certificate never changes a release artifact.
 const releaseEnvironment = { ...process.env, CSC_IDENTITY_AUTO_DISCOVERY: 'false' }
-await run(join(electronDirectory, 'node_modules', '.bin', 'electron-builder'), [
-  '--config', 'electron-builder.yml',
-  '--mac', 'dmg', 'zip', `--${arch}`, '--publish', 'never',
-], releaseEnvironment)
+await run(
+  join(electronDirectory, 'node_modules', '.bin', 'electron-builder'),
+  plan.builderArguments,
+  releaseEnvironment,
+)

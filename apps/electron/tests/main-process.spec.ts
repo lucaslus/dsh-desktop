@@ -10,4 +10,10 @@ describe('Electron embedded Host', () => {
     // assembly without opening a window in the unit-test worker.
     expect(mainProcessSource).toContain("entry, 'web', '--no-open', '--port', '0'")
   })
+
+  it('keeps macOS window chrome out of Linux windows', () => {
+    expect(mainProcessSource).toContain("const macOS = process.platform === 'darwin'")
+    expect(mainProcessSource).toContain('if (macOS) {')
+    expect(mainProcessSource).toContain("? 'install it with dnf'")
+  })
 })

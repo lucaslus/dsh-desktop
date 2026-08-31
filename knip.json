@@ -79,6 +79,24 @@
         "@deepseek-ai/.+"
       ]
     },
+    "apps/electron": {
+      "entry": [
+        "scripts/copy-harness-runtime.mjs"
+      ],
+      "ignore": [
+        "scripts/copy-harness-runtime.d.mts",
+        "scripts/package-plan.d.mts"
+      ],
+      "ignoreDependencies": [
+        "@deepseek-ai/dsh",
+        "@deepseek-ai/dsh-atomic-write",
+        "@deepseek-ai/dsh-session-telemetry",
+        "@deepseek-ai/dsh-session-title-llm",
+        "@deepseek-ai/dsh-spill",
+        "dsh-jsonrpc-agent-pkg",
+        "electron-builder"
+      ]
+    },
     "packages/host/directory-picker-auto": {
       "ignoreDependencies": [
         "@deepseek-ai/dsh-client-ui-directory-picker-browse",

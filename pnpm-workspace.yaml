@@ -52,7 +52,7 @@ allowBuilds:
   '@google/genai': false
   protobufjs: false
   node-addon-require-builtin: false
-  # Windows-only packaging is not part of this macOS Electron experiment.
+  # Windows packaging is not part of the desktop distribution.
   electron-winstaller: false
   # JSONL durability calls MoveFileExW with write-through publication on Windows.
   koffi: true
