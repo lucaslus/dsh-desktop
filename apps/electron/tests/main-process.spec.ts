@@ -1,9 +1,10 @@
 import { readFileSync } from 'node:fs'
 import { EventEmitter } from 'node:events'
 import { URL } from 'node:url'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const mainProcessSource = readFileSync(new URL('../app/main.mjs', import.meta.url), 'utf8')
+const hostPlatform = process.platform
 
 async function bootDesktop(hasLock = true) {
   vi.resetModules()
@@ -50,6 +51,7 @@ async function bootDesktop(hasLock = true) {
 }
 
 afterEach(() => {
+  Object.defineProperty(process, 'platform', { value: hostPlatform })
   vi.doUnmock('electron')
   vi.doUnmock('node:child_process')
   vi.doUnmock('node:fs')
@@ -64,7 +66,11 @@ describe('Electron embedded Host', () => {
   })
 })
 
-describe('Electron window lifetime', () => {
+describe.each(['darwin', 'linux'])('Electron %s window lifetime', (platform) => {
+  beforeEach(() => {
+    Object.defineProperty(process, 'platform', { value: platform })
+  })
+
   it('keeps the host and renderer alive when closing during startup', async () => {
     const { app, host, windows } = await bootDesktop()
     const window = windows[0]!

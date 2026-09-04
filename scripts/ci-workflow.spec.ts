@@ -276,6 +276,58 @@ describe('E2B e2e workflow', () => {
   })
 })
 
+describe('Electron release workflow', () => {
+  it('publishes matching native macOS and Fedora installers after Fedora 44 smoke coverage', () => {
+    const workflow = loadWorkflow('.github/workflows/electron-release.yml')
+    const macOS = workflowJob(workflow, 'package-macos')
+    const fedora = workflowJob(workflow, 'package-fedora')
+    const release = workflowJob(workflow, 'release')
+    if (!Array.isArray(fedora.steps) || !Array.isArray(release.steps)) {
+      throw new TypeError('Electron release workflow must define Fedora and release steps')
+    }
+
+    expect(macOS.strategy).toMatchObject({
+      matrix: {
+        include: [
+          { arch: 'arm64', runner: 'macos-14' },
+          { arch: 'x64', runner: 'macos-15-intel' },
+        ],
+      },
+    })
+    expect(fedora.strategy).toMatchObject({
+      matrix: {
+        include: [
+          { arch: 'arm64', runner: 'ubuntu-24.04-arm' },
+          { arch: 'x64', runner: 'ubuntu-24.04' },
+        ],
+      },
+    })
+
+    const fedoraSteps = fedora.steps.filter(isRecord)
+    expect(fedoraSteps.find(step => step.name === 'Install RPM build dependency')).toMatchObject({
+      run: 'sudo apt-get update && sudo apt-get install --no-install-recommends -y rpm',
+    })
+    expect(fedoraSteps.find(step => step.name === 'Package Fedora RPM')).toMatchObject({
+      run: 'node apps/electron/scripts/package-linux.mjs ${{ matrix.arch }}',
+    })
+    const smoke = fedoraSteps.find(step => step.name === 'Verify RPM on Fedora 44')
+    if (typeof smoke?.run !== 'string') throw new TypeError('Fedora smoke step must define a command')
+    expect(smoke.run).toContain('fedora:44')
+    expect(smoke.run).toContain('smoke-fedora-rpm.sh')
+    const windowSmoke = fedoraSteps.find(step => step.name === 'Verify Linux window close and reopen')
+    if (typeof windowSmoke?.run !== 'string') throw new TypeError('Linux window smoke must define a command')
+    expect(windowSmoke.run).toContain('xvfb-run --auto-servernum')
+    expect(windowSmoke.run).toContain('run test:window-lifecycle')
+
+    expect(release.needs).toEqual(['package-macos', 'package-fedora'])
+    const releaseSteps = release.steps.filter(isRecord)
+    const download = releaseSteps.find(step => step.name === 'Download release assets')
+    const publish = releaseSteps.find(step => step.name === 'Publish release assets')
+    expect(download).toMatchObject({ with: { pattern: 'electron-*' } })
+    expect(JSON.stringify(publish)).toContain('apps/electron/dist/release/*.rpm')
+  })
+})
+
 describe('Python release workflows', () => {
   it('keeps complete wheel validation separate from protected public publication', () => {
     const workflow = loadWorkflow('.github/workflows/python-release.yml')

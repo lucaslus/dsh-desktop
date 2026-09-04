@@ -1,6 +1,7 @@
 # Agent Note: Electron Fedora RPM 分发
 
 Status: implemented
+Archived: 2026-09-04
 
 [English](2026-08-27-electron-fedora-rpm-distribution.md) | 中文
 

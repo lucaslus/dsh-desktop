@@ -1,59 +1,10 @@
-import { join } from 'node:path'
 import { describe, expect, it, vi } from 'vitest'
-import {
-  harnessRuntimeDestination,
-  resolveReleaseTarget,
-} from '../scripts/release-target.mjs'
 import {
   applicationMenuTemplate,
   nativeWindowOptions,
   needsInsetDragRegion,
   updateInstallMessage,
 } from '../app/platform.mjs'
-
-describe('Electron release targets', () => {
-  it('builds both macOS architectures on matching hosts', () => {
-    expect(resolveReleaseTarget('darwin', 'arm64', { platform: 'darwin', arch: 'arm64' })).toMatchObject({
-      builderArguments: ['--mac', 'dmg', 'zip', '--arm64'],
-      nodePtyPrebuild: 'darwin-arm64',
-    })
-    expect(resolveReleaseTarget('darwin', 'x64', { platform: 'darwin', arch: 'x64' })).toMatchObject({
-      builderArguments: ['--mac', 'dmg', 'zip', '--x64'],
-      nodePtyPrebuild: 'darwin-x64',
-    })
-  })
-
-  it('builds a Fedora-compatible RPM on a matching Linux x64 host', () => {
-    expect(resolveReleaseTarget('linux', 'x64', { platform: 'linux', arch: 'x64' })).toMatchObject({
-      builderArguments: ['--linux', 'rpm', '--x64'],
-      nodePtyPrebuild: 'linux-x64',
-    })
-  })
-
-  it('rejects unsupported and cross-built native targets', () => {
-    expect(() => resolveReleaseTarget('linux', 'arm64', { platform: 'linux', arch: 'arm64' }))
-      .toThrow('Unsupported Linux architecture: arm64')
-    expect(() => resolveReleaseTarget('win32', 'x64', { platform: 'win32', arch: 'x64' }))
-      .toThrow('Unsupported Electron release platform: win32')
-    expect(() => resolveReleaseTarget('linux', 'x64', { platform: 'darwin', arch: 'x64' }))
-      .toThrow('Build linux-x64 on a matching linux-x64 host')
-  })
-
-  it('copies the runtime into each platform resources directory', () => {
-    const base = {
-      appOutDir: '/release/app',
-      packager: { appInfo: { productFilename: 'DeepSeek Harness' } },
-    }
-    expect(harnessRuntimeDestination({ ...base, electronPlatformName: 'darwin' })).toBe(join(
-      '/release/app', 'DeepSeek Harness.app', 'Contents', 'Resources', 'harness',
-    ))
-    expect(harnessRuntimeDestination({ ...base, electronPlatformName: 'linux' })).toBe(join(
-      '/release/app', 'resources', 'harness',
-    ))
-    expect(() => harnessRuntimeDestination({ ...base, electronPlatformName: 'win32' }))
-      .toThrow('Unsupported Electron release platform: win32')
-  })
-})
 
 describe('Electron native presentation', () => {
   it('uses inset chrome only on macOS', () => {

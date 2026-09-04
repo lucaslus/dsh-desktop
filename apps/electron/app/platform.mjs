@@ -23,7 +23,7 @@ export function needsInsetDragRegion(platform) {
  */
 export function updateInstallMessage(platform) {
   if (platform === 'linux') {
-    return 'Download the x86_64 RPM from GitHub Releases, then install it with your package manager.'
+    return 'Download the RPM matching your architecture from GitHub Releases, then install it with dnf.'
   }
   return 'Download the matching DMG from GitHub Releases, then replace the app in Applications.'
 }

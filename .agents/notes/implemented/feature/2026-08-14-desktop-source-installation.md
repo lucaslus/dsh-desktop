@@ -14,11 +14,11 @@ The desktop app is distributed as source code. `apps/desktop/bootstrap.sh` shall
 
 `DSH.app` starts the web host from its source checkout. Its Update and Restart command runs `apps/desktop/update.sh`, which requires a clean Git checkout, fast-forwards it from its configured remote, rebuilds the workspace and app, and opens the rebuilt app. A locally installed `dsh` command remains a fallback for launching the app outside its checkout.
 
-The macOS GitHub Actions workflow verifies the source build and app signature on macOS. It uploads a CI artifact for review but does not publish a GitHub Release or updater feed.
+The macOS GitHub Actions workflow verifies the source build and app signature on macOS. It uploads a CI artifact for review but does not publish a GitHub Release or updater feed. This source-installed Swift shell remains a macOS alternative to the separately maintained [self-contained Electron distribution](2026-08-31-fedora-electron-rpm-distribution.md).
 
 ## Alternatives considered
 
-**Ship a self-contained release.** Including Node.js and the built runtime gives a one-click installer, but makes the app download much larger than the upstream web package and duplicates a runtime users already manage.
+**Use the self-contained Electron release as the only desktop channel.** Including Node.js and the built runtime gives a one-click installer, but makes the app download much larger than the upstream web package and duplicates a runtime for users who already build the repository. The source channel retains that smaller, inspectable installation option on macOS.
 
 **Require a globally installed Node.js or pnpm.** Global runtime and package-manager installations create avoidable setup dependencies and are unreliable for Finder launches. The installer opportunistically links an exact existing Node.js runtime inside the checkout, otherwise manages a verified copy there; its Corepack selects the repository-pinned pnpm version.
 
@@ -31,4 +31,4 @@ The macOS GitHub Actions workflow verifies the source build and app signature on
 - Installation downloads the managed Node.js 24.15.0 runtime only when an exact local runtime is unavailable, and can take as long as a normal repository build; macOS Command Line Tools remain the one system-level prerequisite for Git and Swift.
 - Updating is explicit and fails before modifying a checkout with uncommitted changes or a non-fast-forward history.
 - The app bundle stays small because it contains only the native shell, icon, and metadata; the Applications entry follows the rebuilt in-tree bundle rather than copying it.
-- Users who need a conventional standalone installer must use a future separately designed distribution channel.
+- Users who need a conventional standalone installer use the separately maintained [Electron distribution](2026-08-31-fedora-electron-rpm-distribution.md).

@@ -14,7 +14,7 @@ The [Electron application](../../../../apps/electron/README.md) hides its window
 
 The [native macOS shell](../../../../apps/desktop/README.md) retains its AppKit window and Web view after closing, reopens them through the application delegate, and terminates its host only during application termination. Both shells expose Close Window separately from Quit.
 
-This decision concerns window lifetime, not the separate [source installation](../feature/2026-08-14-desktop-source-installation.md) and [Electron distribution](../feature/2026-08-27-electron-fedora-rpm-distribution.md) decisions; those records retain their installation and packaging rationale.
+This decision concerns window lifetime, not the separate [source installation](../feature/2026-08-14-desktop-source-installation.md) and [Electron distribution](../feature/2026-08-31-fedora-electron-rpm-distribution.md) decisions; those records retain their installation and packaging rationale.
 
 ## Alternatives considered
 
@@ -26,4 +26,4 @@ This decision concerns window lifetime, not the separate [source installation](.
 
 Window dismissal does not cancel running tasks. The retained renderer consumes memory until explicit Quit, and Linux users without a visible window reopen it through the application launcher. This change does not introduce a system tray or a background scheduling service.
 
-Focused unit tests cover startup close, host readiness without a window, activation, minimized restoration, single-instance rejection, and explicit Quit. The native Electron snapshot uses the shipping entry and real staged host to verify hidden startup, the Close Window menu, second-process reopening, and host shutdown without a model key. Native Swift compilation checks the delegate API; macOS Dock interaction for the Swift shell and Fedora window-manager behavior remain manual verification gaps.
+Focused macOS and Linux unit tests cover startup close, host readiness without a window, activation, minimized restoration, single-instance rejection, and explicit Quit. The native Electron snapshot uses the shipping entry and real staged host to verify hidden startup, the Close Window menu, second-process reopening, and host shutdown without a model key. CI runs the native snapshot on both macOS and Linux architectures, using Xvfb for Linux. Native Swift compilation checks the delegate API; macOS Dock interaction for the Swift shell and Fedora window-manager behavior remain manual verification gaps.

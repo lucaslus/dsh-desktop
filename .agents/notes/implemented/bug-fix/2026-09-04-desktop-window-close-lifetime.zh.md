@@ -14,7 +14,7 @@ Status: implemented
 
 [原生 macOS 壳](../../../../apps/desktop/README.zh.md)在关闭后保留 AppKit 窗口和 Web 视图，通过应用委托重新打开，并且只在应用终止时结束宿主。两种壳都将 Close Window 与 Quit 分开提供。
 
-本决策涉及窗口生命周期，不改变独立的[源码安装](../feature/2026-08-14-desktop-source-installation.zh.md)和 [Electron 分发](../feature/2026-08-27-electron-fedora-rpm-distribution.zh.md)决策；这些记录仍保留安装及打包方面的依据。
+本决策涉及窗口生命周期，不改变独立的[源码安装](../feature/2026-08-14-desktop-source-installation.zh.md)和 [Electron 分发](../feature/2026-08-31-fedora-electron-rpm-distribution.zh.md)决策；这些记录仍保留安装及打包方面的依据。
 
 ## 考虑过的替代方案
 
@@ -26,4 +26,4 @@ Status: implemented
 
 收起窗口不会取消正在执行的任务。保留的渲染进程会持续占用内存，直到显式 Quit；Linux 用户在窗口不可见时通过应用启动器重新打开。本改动不引入系统托盘或后台调度服务。
 
-定向单元测试覆盖启动中关闭、无窗口时宿主就绪、激活、从最小化恢复、单实例拒绝和显式 Quit。原生 Electron 快照通过实际应用入口与真实暂存宿主，在无需模型密钥的情况下验证隐藏期间启动、Close Window 菜单、第二进程唤回和宿主关闭。原生 Swift 编译检查委托 API；Swift 壳的 macOS Dock 交互和 Fedora 窗口管理器行为仍需手动验证。
+macOS 和 Linux 定向单元测试覆盖启动中关闭、无窗口时宿主就绪、激活、从最小化恢复、单实例拒绝和显式 Quit。原生 Electron 快照通过实际应用入口与真实暂存宿主，在无需模型密钥的情况下验证隐藏期间启动、Close Window 菜单、第二进程唤回和宿主关闭。CI 在 macOS 和 Linux 的两种架构上运行原生快照，Linux 使用 Xvfb。原生 Swift 编译检查委托 API；Swift 壳的 macOS Dock 交互和 Fedora 窗口管理器行为仍需手动验证。

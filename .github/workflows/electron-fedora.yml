@@ -9,7 +9,7 @@ on:
       - '.github/workflows/electron-release.yml'
       - 'pnpm-lock.yaml'
   push:
-    branches: [master]
+    branches: ['**']
     paths:
       - 'apps/electron/**'
       - 'apps/desktop/Resources/**'
@@ -24,7 +24,15 @@ permissions:
 jobs:
   rpm:
     name: Build and inspect RPM
-    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+          - arch: x64
+            runner: ubuntu-24.04
+    runs-on: ${{ matrix.runner }}
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v6
@@ -50,7 +58,12 @@ jobs:
         run: pnpm run build
 
       - name: Package Fedora RPM
-        run: node apps/electron/scripts/package.mjs linux x64
+        run: node apps/electron/scripts/package-linux.mjs ${{ matrix.arch }}
+
+      - name: Verify Linux window close and reopen
+        run: |
+          sudo apt-get install --no-install-recommends -y xvfb
+          xvfb-run --auto-servernum pnpm --filter deepseek-harness-desktop-electron run test:window-lifecycle
 
       - name: Inspect RPM payload
         run: |
@@ -61,13 +74,14 @@ jobs:
       - name: Verify installation on Fedora
         run: |
           docker run --rm \
-            --volume "$PWD/apps/electron/dist/release:/release:ro" \
-            fedora:latest \
-            bash -euc 'dnf install --assumeyes /release/*.rpm && rpm --query deepseek-harness-desktop'
+            --volume "$PWD:/workspace:ro" \
+            --workdir /workspace \
+            fedora:44 \
+            bash apps/electron/scripts/smoke-fedora-rpm.sh apps/electron/dist/release
 
       - name: Upload RPM for review
         uses: actions/upload-artifact@v4
         with:
-          name: electron-linux-x64
+          name: electron-linux-${{ matrix.arch }}
           if-no-files-found: error
           path: apps/electron/dist/release/*.rpm

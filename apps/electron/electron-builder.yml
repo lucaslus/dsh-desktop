@@ -33,15 +33,25 @@ dmg:
   title: DeepSeek Harness
 linux:
   category: Development
-  description: A plugin-based agent harness with a native desktop shell.
-  executableName: deepseek-harness
-  icon: ../desktop/Resources/icon.png
+  description: A self-contained desktop application for DeepSeek Harness
+  executableName: dsh-desktop
+  icon: ../desktop/Resources/icon.icns
   maintainer: DeepSeek Harness Desktop contributors
   synopsis: DeepSeek Harness desktop application
   syncDesktopName: true
   target:
     - target: rpm
-      arch:
-        - x64
+  vendor: DeepSeek Harness Desktop contributors
 rpm:
+  depends:
+    - alsa-lib
+    - gtk3
+    - libnotify
+    - nss
+    - libXScrnSaver
+    - (libXtst or libXtst6)
+    - xdg-utils
+    - at-spi2-core
+    - (libuuid or libuuid1)
+    - mesa-libgbm
   packageName: deepseek-harness-desktop

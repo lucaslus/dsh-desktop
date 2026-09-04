@@ -1,9 +1,13 @@
 {
   "name": "deepseek-harness-desktop-app",
-  "version": "0.0.4",
+  "desktopName": "DeepSeek Harness",
+  "version": "0.0.5",
   "description": "DeepSeek Harness desktop application",
   "author": "DeepSeek Harness Desktop contributors",
+  "homepage": "https://github.com/lucaslus/dsh-desktop",
+  "license": "MIT",
   "private": true,
+  "repository": "https://github.com/lucaslus/dsh-desktop.git",
   "type": "module",
   "main": "main.mjs",
   "dependencies": {}

@@ -14,11 +14,11 @@ Status: implemented
 
 `DSH.app` 从自己的源码 checkout 启动 Web host。其“Update and Restart”命令运行 `apps/desktop/update.sh`：它要求 Git checkout 干净，从已配置的 remote 快进更新，重新构建 workspace 和 app 后打开新的 app。脱离 checkout 使用时，已本地安装的 `dsh` 命令仍可作为启动后备。
 
-macOS GitHub Actions workflow 会在 macOS 上验证源码构建和 app 签名。它只上传供检查的 CI artifact，不发布 GitHub Release，也不提供更新源。
+macOS GitHub Actions workflow 会在 macOS 上验证源码构建和 app 签名。它只上传供检查的 CI artifact，不发布 GitHub Release，也不提供更新源。这个源码安装的 Swift shell 仍作为 macOS 方案，与单独维护的[自包含 Electron 发布渠道](2026-08-31-fedora-electron-rpm-distribution.zh.md)并存。
 
 ## 考虑过的替代方案
 
-**发布自包含 Release。** 把 Node.js 和已构建运行时一并包含可以实现一键安装，但会让 app 下载远大于 upstream Web 包，并且重复携带用户已经管理的运行时。
+**只保留自包含 Electron Release 这一个桌面渠道。** 把 Node.js 和已构建运行时一并包含可以实现一键安装，但会让 app 下载远大于 upstream Web 包，并为已经自行构建仓库的用户重复携带运行时。源码渠道在 macOS 上保留更小且可检查的安装方式。
 
 **要求全局安装 Node.js 或 pnpm。** 全局 runtime 和包管理器安装会增加本可避免的设置依赖，也无法保证 Finder 启动时可用。安装器会优先在 checkout 内链接精确的现有 Node.js runtime，缺失时再管理已校验的副本，并由其 Corepack 选择仓库固定的 pnpm 版本。
 
@@ -31,4 +31,4 @@ macOS GitHub Actions workflow 会在 macOS 上验证源码构建和 app 签名�
 - 仅当没有精确的本地 Node.js 24.15.0 runtime 时，安装才会下载受管理版本；整体耗时与普通仓库构建相当。Git 和 Swift 仍需要 macOS Command Line Tools 这个系统级前提。
 - 更新是显式操作；面对未提交改动或无法快进的历史，它会在修改 checkout 前失败。
 - app bundle 只包含原生 shell、图标和元数据，因此保持较小体积；Applications 入口会跟随重新构建的仓库内 bundle，而不是复制它。
-- 需要传统独立安装器的用户，未来应使用单独设计的分发渠道。
+- 需要传统独立安装器的用户可使用单独维护的 [Electron 发布渠道](2026-08-31-fedora-electron-rpm-distribution.zh.md)。
