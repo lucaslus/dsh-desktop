@@ -3,13 +3,14 @@ import { Context, Service } from '@deepseek-ai/cordis'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { cleanup } from '@testing-library/react'
 import { LocaleRuntime } from '@deepseek-ai/dsh-client-locale/client'
-import { SlotRegistry } from '@deepseek-ai/dsh-client-runtime/client'
+import { SlotRegistry } from '@deepseek-ai/dsh-client-ui-renderer/client'
 import { resolveSlotLabel } from '@deepseek-ai/dsh-client-ui-slots'
 import { usePinnedBrowserLanguages } from '@deepseek-ai/dsh-client-test-runtime'
 import { apply, inject, NS } from '../src/client/index.ts'
 import { PluginInventorySettingsTab } from '../src/client/PluginInventorySettingsTab.tsx'
 import { PluginInstallSettingsTab } from '../src/client/PluginInstallSettingsTab.tsx'
 import type { PluginInventorySettingsTabInjected } from '../src/client/PluginInventorySettingsTab.tsx'
+import { apply as hostApply } from '../src/index.ts'
 
 usePinnedBrowserLanguages('zh-CN')
 afterEach(cleanup)
@@ -47,6 +48,10 @@ function declare(slots: SlotRegistry): () => void {
 }
 
 describe('ui-settings-plugin-inventory browser plugin', () => {
+  it('keeps the host Loader entry inert', () => {
+    expect(hostApply).not.toThrow()
+  })
+
   it('declares only the services used by the Settings Remote contribution', () => {
     expect(inject).toEqual(['slots', 'locale', 'remote', 'remote.pluginInventory', 'remote.cliInstall'])
   })
@@ -74,6 +79,11 @@ describe('ui-settings-plugin-inventory browser plugin', () => {
     expect(installEntry.options).toMatchObject({ id: 'install', order: 11 })
     expect(resolveSlotLabel(installEntry.options.label)).toBe('安装插件')
 
+    // Shipped preset names resolve over the agent-preset dictionaries the
+    // real plugin registers; user-authored metadata stays untranslated.
+    b.locale.register('settings.agentPreset', 'zh', { presetStandardName: '标准模式' } as never)
+    expect(injected.presetName({ id: 'standard', trust: 'system', isDefault: true, rows: [] })).toBe('标准模式')
+    expect(injected.presetName({ id: 'mine', trust: 'user', name: '我自己的', isDefault: false, rows: [] })).toBe('我自己的')
     await b.ctx.fiber.dispose()
   })
 

@@ -38,7 +38,6 @@ interface EffortChoice {
   key: string
   effort: string | undefined
   label: string
-  description?: string
 }
 
 /**
@@ -147,7 +146,6 @@ export function ModelSelect(
         key: `effort:${effort.id}`,
         effort: effort.id,
         label: effort.name,
-        ...effort.description === undefined ? {} : { description: effort.description },
       })),
     ], [reasoning, t])
   const busy = state.status === 'selecting'
@@ -156,14 +154,6 @@ export function ModelSelect(
     lastActionRef.current = 'load'
     load()
   }
-
-  // Mount-time load resolves the trigger label; every open refreshes.
-  useEffect(() => {
-    if (available) {
-      lastActionRef.current = 'load'
-      load()
-    }
-  }, [available, load])
 
   useEffect(() => {
     if (!open) return
@@ -287,13 +277,19 @@ export function ModelSelect(
     void select(selection).then(settleSelection)
   }
 
-  const modelLabel = currentChoice?.model.name ?? t('trigger.fallback')
+  const waiting = state.current === null && state.status === 'loading'
+  const modelLabel = waiting
+    ? t('trigger.loading')
+    : currentChoice?.model.name
+      ?? (state.current === null ? t('trigger.fallback') : `${state.current.provider}/${state.current.model}`)
   const triggerLabel = effortLabel === undefined ? modelLabel : `${modelLabel} · ${effortLabel}`
-  const triggerAria = currentChoice === undefined
-    ? t('trigger.selectAria')
-    : effortLabel === undefined
-      ? t('trigger.aria', { model: modelLabel })
-      : t('trigger.ariaEffort', { model: modelLabel, effort: effortLabel })
+  const triggerAria = waiting
+    ? t('trigger.loading')
+    : state.current === null
+      ? t('trigger.selectAria')
+      : effortLabel === undefined
+        ? t('trigger.aria', { model: modelLabel })
+        : t('trigger.ariaEffort', { model: modelLabel, effort: effortLabel })
   itemRefs.current = []
   let itemIndex = 0
   const itemRef = () => {
@@ -432,9 +428,6 @@ export function ModelSelect(
                             <ProviderBrandIcon provider={group.id} brandIcon={group.brandIcon} size={16} className={css.optionBrand} />
                             <span className={css.optionCopy}>
                               <span className={css.modelName}>{model.name}</span>
-                              {model.description !== undefined && (
-                                <span className={css.description}>{model.description}</span>
-                              )}
                             </span>
                             <span className={css.check}>
                               {selected ? <IconCheckOutline16 /> : null}
@@ -478,9 +471,6 @@ export function ModelSelect(
                   >
                     <span className={css.optionCopy}>
                       <span className={css.modelName}>{level.label}</span>
-                      {level.description !== undefined && (
-                        <span className={css.description}>{level.description}</span>
-                      )}
                     </span>
                     <span className={css.check}>
                       {effectiveEffort === level.effort ? <IconCheckOutline16 /> : null}

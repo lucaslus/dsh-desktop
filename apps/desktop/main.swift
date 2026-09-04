@@ -3,7 +3,7 @@
 // Responsibilities are deliberately tiny — the Node harness owns everything:
 //   1. Locate the installer's managed Node runtime, then a compatible local fallback.
 //   2. Spawn the host (`node apps/cli/lib/bin.js web --port 0`, or `pnpm dsh web`).
-//   3. Parse the `dsh web: http://127.0.0.1:<port>` readiness line.
+//   3. Parse the complete authenticated loopback URL from the readiness line.
 //   4. Show the GUI in a WKWebView; tear the host down on quit.
 import AppKit
 import WebKit
@@ -310,7 +310,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate {
     private var updateProcess: Process?
     private var updateOutput = Data()
 
-    private let urlPattern = try! NSRegularExpression(pattern: #"dsh web: (http://127\.0\.0\.1:\d+)"#)
+    private let urlPattern = try! NSRegularExpression(pattern: #"dsh web: (http://127\.0\.0\.1:\d+[^\s]*)(?:[ \t]|$)"#)
 
     // MARK: Startup
 

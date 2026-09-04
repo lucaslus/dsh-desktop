@@ -2,7 +2,7 @@
 
 English | [中文](README.zh.md)
 
-A direction-validation prototype for the desktop form of the GUI: a thin native AppKit window (`WKWebView`) around the existing Web host. It implements the "thin native shell + `dsh web` subprocess" option — zero protocol changes, the [IPC carrier](../../.agents/notes/implemented/architecture/2026-07-19-gui-layering-and-rpc-protocol.md) remains the designed next step.
+A direction-validation prototype for the desktop form of the GUI: a thin native AppKit window (`WKWebView`) around the existing Web host. It implements the "thin native shell + `dsh web` subprocess" option without changing the [Web client protocol](../../docs/subsystems/web-client.md).
 
 The shell deliberately embeds **no Node runtime in `DSH.app`**. The installer first reuses an existing Node.js 24.15.0 runtime, otherwise downloads the verified archive into `apps/desktop/.runtime/node`; Finder and Dock launches prefer that managed runtime, then fall back to a compatible user-installed Node (`^22.19.0 || >=24.0.0`).
 
@@ -13,7 +13,7 @@ Closing the window, including `⌘W`, keeps the application and local host runni
 1. Resolves the repository root (`DSH_REPO` env override, else the in-tree bundle location).
 2. Prefers the installer-managed Node runtime, then searches the env PATH, the user's login-shell PATH (covers Homebrew/nvm), and common prefixes; rejects unsatisfied versions with an install prompt.
 3. Spawns the built in-tree host, or a user-installed `dsh` command when no checkout is available.
-4. Waits for the `dsh web: http://127.0.0.1:<port>` readiness line, which prints only after the full plugin tree settles, then loads the URL in the `WKWebView`.
+4. Waits for the `dsh web: http://127.0.0.1:<port>/?token=...` readiness line, which prints only after the full plugin tree settles, then loads the complete authenticated URL in the `WKWebView`.
 5. Mirrors the Web theme into the native chrome (`ThemeBridge`): a transparent title bar painted with the sidebar fill token and a window appearance that follows the resolved light/dark theme, so the left edge reads as one continuous surface.
 6. Places a native interaction strip across the transparent title bar for window dragging and the system-configured double-click action (zoom by default).
 7. Lets a source checkout update itself through **Update and Restart…**: `git pull --ff-only`, dependency install, Web build, app rebuild, and relaunch.

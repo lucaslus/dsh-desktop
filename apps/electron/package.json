@@ -21,7 +21,7 @@
     "@deepseek-ai/dsh-session-telemetry": "workspace:^",
     "@deepseek-ai/dsh-session-title-llm": "workspace:^",
     "@deepseek-ai/dsh-spill": "workspace:^",
-    "dsh-jsonrpc-agent-pkg": "workspace:^"
+    "dsh-python-runtime-closure": "workspace:^"
   },
   "devDependencies": {
     "electron": "43.4.0",

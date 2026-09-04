@@ -2,7 +2,7 @@
 
 [English](README.md) | 中文
 
-桌面端方向验证原型：用一个原生 AppKit 窗口（`WKWebView`）套住现有 Web 宿主，即“薄原生壳 + `dsh web` 子进程”方案，不改任何协议；架构预留的 [IPC carrier](../../.agents/notes/implemented/architecture/2026-07-19-gui-layering-and-rpc-protocol.zh.md) 仍是下一步。
+桌面端方向验证原型：用一个原生 AppKit 窗口（`WKWebView`）套住现有 Web 宿主，即“薄原生壳 + `dsh web` 子进程”方案，不改变 [Web 客户端协议](../../docs/subsystems/web-client.zh.md)。
 
 壳**不在 `DSH.app` 内捆绑 Node 运行时**：安装器会优先复用现有的 Node.js 24.15.0；否则把已校验的归档下载到 `apps/desktop/.runtime/node`。Finder 与 Dock 启动时优先使用这份受管理的运行时，其次才查找满足 `^22.19.0 || >=24.0.0` 的用户 Node。
 
@@ -13,7 +13,7 @@
 1. 定位仓库根（`DSH_REPO` 环境变量优先，否则按仓库内构建位置推导）。
 2. 优先使用安装器管理的 Node 运行时；然后依次从环境 PATH、登录 shell 的 PATH（覆盖 Homebrew/nvm）和常见前缀找 Node；版本不符弹窗提示安装。
 3. 优先拉起仓库内已构建的宿主；找不到仓库时使用用户已安装的 `dsh` 命令。
-4. 等待 `dsh web: http://127.0.0.1:<port>` 就绪行（该行只在整棵插件树挂载完成后打印），然后在 `WKWebView` 中加载。
+4. 等待 `dsh web: http://127.0.0.1:<port>/?token=...` 就绪行（该行只在整棵插件树挂载完成后打印），然后在 `WKWebView` 中加载完整的认证 URL。
 5. 将 Web 主题同步到原生窗口（`ThemeBridge`）：透明标题栏使用侧边栏填充色，窗口外观跟随当前深浅主题，使左侧看起来是连续的界面。
 6. 在透明标题栏上覆盖原生交互条，用于拖动窗口并执行系统配置的双击动作（默认缩放）。
 7. 源码仓库可通过 **Update and Restart…** 自更新：`git pull --ff-only`、安装依赖、构建 Web、重打包应用并重启。

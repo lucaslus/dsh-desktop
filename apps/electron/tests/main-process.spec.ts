@@ -88,6 +88,14 @@ describe.each(['darwin', 'linux'])('Electron %s window lifetime', (platform) => 
     expect(windows).toHaveLength(1)
   })
 
+  it('preserves the authentication URL across stdout chunks and ignores the LAN address', async () => {
+    const { host, windows } = await bootDesktop()
+    host.stdout.emit('data', 'dsh web: http://127.0.0.1:43210/?token=first')
+    expect(windows[0]!.loadURL).not.toHaveBeenCalled()
+    host.stdout.emit('data', '-second (LAN: http://192.168.1.2:43210/?token=first-second)\n')
+    expect(windows[0]!.loadURL).toHaveBeenCalledWith('http://127.0.0.1:43210/?token=first-second')
+  })
+
   it.each(['activate', 'second-instance'])('restores the same window on %s without restarting the host', async (event) => {
     const { app, host, spawn, windows } = await bootDesktop()
     const window = windows[0]!

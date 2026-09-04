@@ -6,8 +6,9 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 import {
-  IconChevronDownOutline14, Menu, PROVIDER_BRAND_OPTIONS, ProviderBrandIcon,
+  IconChevronDownOutline14, Menu, ProviderBrandIcon,
 } from '@deepseek-ai/dsh-client-ui-primitives'
+import { PROVIDER_BRAND_OPTIONS } from './locales.ts'
 import styles from './ModelsSection.module.css'
 
 const GENERIC = '__generic__'

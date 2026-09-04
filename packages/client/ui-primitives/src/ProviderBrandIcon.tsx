@@ -76,51 +76,6 @@ const BRAND_ICONS: Readonly<Record<string, string>> = {
   'zai-coding-cn': zaiIcon,
 }
 
-/** One safe, bundled brand choice for a custom provider. */
-export interface ProviderBrandOption {
-  /** Stable static asset id stored in the provider profile. */
-  readonly id: string
-  /** Human-readable label used by the settings picker. */
-  readonly label: string
-}
-
-/**
- * Bundled, offline-safe choices for custom providers. We persist the id, not
- * an external image URL, so a profile remains portable and every client
- * renders the same mark without fetching untrusted content.
- */
-export const PROVIDER_BRAND_OPTIONS: readonly ProviderBrandOption[] = [
-  { id: 'deepseek', label: 'DeepSeek' },
-  { id: 'openai', label: 'OpenAI' },
-  { id: 'anthropic', label: 'Anthropic' },
-  { id: 'google', label: 'Google AI' },
-  { id: 'google-vertex', label: 'Google Vertex AI' },
-  { id: 'azure-openai-responses', label: 'Azure OpenAI' },
-  { id: 'amazon-bedrock', label: 'Amazon Bedrock' },
-  { id: 'cloudflare-ai-gateway', label: 'Cloudflare AI Gateway' },
-  { id: 'cloudflare-workers-ai', label: 'Cloudflare Workers AI' },
-  { id: 'mistral', label: 'Mistral AI' },
-  { id: 'groq', label: 'Groq' },
-  { id: 'cerebras', label: 'Cerebras' },
-  { id: 'fireworks', label: 'Fireworks AI' },
-  { id: 'huggingface', label: 'Hugging Face' },
-  { id: 'moonshotai', label: 'Kimi / Moonshot AI' },
-  { id: 'kimi', label: 'Kimi' },
-  { id: 'kimi-coding', label: 'Kimi Coding' },
-  { id: 'qwen-token-plan', label: 'Qwen' },
-  { id: 'minimax', label: 'MiniMax' },
-  { id: 'zai', label: 'Z.ai' },
-  { id: 'xiaomi', label: 'Xiaomi MiMo' },
-  { id: 'nvidia', label: 'NVIDIA' },
-  { id: 'openrouter', label: 'OpenRouter' },
-  { id: 'together', label: 'Together AI' },
-  { id: 'xai', label: 'xAI' },
-  { id: 'vercel-ai-gateway', label: 'Vercel AI Gateway' },
-  { id: 'github-copilot', label: 'GitHub Copilot' },
-  { id: 'ant-ling', label: 'Ant Group Ling' },
-  { id: 'opencode', label: 'OpenCode' },
-]
-
 /** Logos defined through currentColor are rendered as CSS masks, so they keep contrast in either app theme. */
 const MONOCHROME_PROVIDERS: ReadonlySet<string> = new Set([
   'anthropic', 'github-copilot', 'groq', 'moonshotai', 'moonshotai-cn',

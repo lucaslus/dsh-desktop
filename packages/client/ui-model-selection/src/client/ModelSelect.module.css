@@ -80,10 +80,11 @@
   padding: 4px;
   /* Surface tokens match the Menu primitive card (ui-primitives
    * Menu.module.css) so every dropdown reads as the same material. */
-  border: 1px solid var(--dsw-alias-border-inverted);
-  border-radius: 12px;
+  border: 0;
+  border-radius: 20px;
   background: var(--dsw-specific-menu);
-  box-shadow: var(--dsw-shadow-lv3);
+  --dsw-elevation-stroke-color: var(--dsw-alias-border-l1);
+  box-shadow: var(--dsw-elevation-prominent);
   color: var(--dsw-alias-label-primary);
   /* Elevated surface: the scrollbar thumb takes the l2 elevation tokens.
      Declared here rather than on the scrolling `.groups` child so the
@@ -97,7 +98,7 @@
 .searchWrap {
   padding: 2px 2px 6px;
   flex: 0 0 auto;
-  border-bottom: 1px solid var(--dsw-alias-border-l1);
+  border-bottom: 0.5px solid var(--dsw-alias-border-l1);
   margin-bottom: 4px;
 }
 
@@ -277,15 +278,6 @@
   font-size: 14px;
   line-height: 20px;
   font-weight: 500;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.description {
-  overflow: hidden;
-  color: var(--dsw-alias-label-tertiary);
-  font-size: 12px;
-  line-height: 18px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }

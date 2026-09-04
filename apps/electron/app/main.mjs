@@ -9,7 +9,7 @@ import {
   updateInstallMessage,
 } from './platform.mjs'
 
-const readinessPattern = /dsh web: (http:\/\/127\.0\.0\.1:\d+)/
+const readinessPattern = /dsh web: (http:\/\/127\.0\.0\.1:\d+[^\s]*)(?:[ \t]|\r?\n)/
 const development = process.env.DSH_ELECTRON_DEV === '1'
 const desktopChromeScript = `
   (() => {

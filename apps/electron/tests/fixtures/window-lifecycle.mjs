@@ -2,9 +2,16 @@
 import assert from 'node:assert/strict'
 import { spawn } from 'node:child_process'
 import { once } from 'node:events'
-import { app, BrowserWindow, Menu } from 'electron'
+import { app, BrowserWindow, dialog, Menu } from 'electron'
 
 app.setPath('userData', process.env.DSH_WINDOW_TEST_PROFILE)
+// A startup failure must report its diagnostic instead of waiting for a CI user to dismiss a modal.
+dialog.showMessageBox = (options) => {
+  console.error(options.message, options.detail ?? '')
+  app.once('will-quit', () => app.exit(1))
+  app.quit()
+  return Promise.resolve({ response: 0, checkboxChecked: false })
+}
 let phase = 'starting the application'
 const timeout = setTimeout(() => {
   console.error('Desktop window lifecycle timed out:', {
@@ -42,7 +49,7 @@ async function run() {
 
     phase = 'waiting for the hidden host to load'
     const hostURL = await ready
-    assert.equal((await fetch(hostURL)).ok, true)
+    assert.equal(await contents.executeJavaScript('fetch(location.href).then(response => response.ok)'), true)
     console.log(`HOST_URL ${hostURL}`)
     console.log('Hidden startup: local host ready; page loaded.')
     app.emit('activate')
@@ -69,7 +76,7 @@ async function run() {
     await closeRequested
     assert.equal(window.isDestroyed(), false)
     assert.equal(window.isVisible(), false)
-    assert.equal((await fetch(hostURL)).ok, true)
+    assert.equal(await contents.executeJavaScript('fetch(location.href).then(response => response.ok)'), true)
     console.log('Close Window menu: window hidden; local host still reachable.')
 
     phase = 'waiting for second-instance reopening'

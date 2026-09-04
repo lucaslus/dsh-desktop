@@ -14,9 +14,8 @@ createPackagePlan(platform, arch)
 await rm(stagingDirectory, { recursive: true, force: true })
 await mkdir(dirname(stagingDirectory), { recursive: true })
 await run('pnpm', [
-  // The Electron package depends on both the CLI and the project's maintained
-  // dependency-only runtime manifest. Together they include the CLI's direct
-  // dependencies and its dynamically-loaded plugins.
+  // The maintained executable closure supplies the CLI's dynamically loaded
+  // plugins and required peers, which production-only deployment omits otherwise.
   '--filter', 'deepseek-harness-desktop-electron', 'deploy', '--legacy', '--prod',
   '--config.node-linker=hoisted', '--config.auto-install-peers=false',
   '--config.link-workspace-packages=true',
@@ -27,11 +26,11 @@ await run('pnpm', [
 // pnpm deploy does not materialize workspace packages supplied through the
 // root `link:` overrides. They are runtime dependencies of Cordis, so place
 // their already-built production files in the portable closure explicitly.
-for (const packageName of ['cosmokit', 'schemastery']) {
-  const destination = join(stagingDirectory, 'node_modules', '@deepseek-ai', packageName)
+for (const packageName of ['@deepseek-ai/cosmokit', '@deepseek-ai/schemastery']) {
+  const destination = join(stagingDirectory, 'node_modules', packageName)
   await rm(destination, { recursive: true, force: true })
   await cp(
-    join(repositoryRoot, 'vendor', packageName),
+    join(repositoryRoot, 'vendor', packageName.slice('@deepseek-ai/'.length)),
     destination,
     { recursive: true, dereference: true },
   )

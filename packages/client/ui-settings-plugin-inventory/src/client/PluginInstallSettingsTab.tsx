@@ -1,7 +1,7 @@
 import { useState, useEffect, type ReactNode } from 'react'
 import type { PropsLocale, PropsRuntime, InjectFace } from '@deepseek-ai/dsh-client-ui-slots'
 import { Button } from '@deepseek-ai/dsh-client-ui-primitives'
-import type { CliInstallResult, CliInstallStatus } from '@deepseek-ai/dsh-host-plugin-inventory/types'
+import type { CliInstallResult, CliInstallStatus } from '@deepseek-ai/dsh-api-remotes/client'
 import css from './PluginInstallSettingsTab.module.css'
 
 export interface PluginInstallSettingsTabInjected {
@@ -66,7 +66,7 @@ export function PluginInstallSettingsTab(
             </Button>
             {cliStatus.installed && cliStatus.path && (
               <span className={css.successMessage}>
-                Installed to: <code>{cliStatus.path}</code>
+                {t('installCliLocation')} <code>{cliStatus.path}</code>
                 <br />
                 {t('installCliPathHint')}
               </span>
@@ -81,17 +81,17 @@ export function PluginInstallSettingsTab(
       <section className={css.group}>
         <h3 className={css.heading}>{t('installGuideAddHeading')}</h3>
         <p className={css.description}>{t('installGuideAddCmd')}</p>
-        <pre className={css.codeBlock}><code>dsh plugin --profile web add @scope/my-plugin</code></pre>
+        <pre className={css.codeBlock}><code>{t('installGuideAddCmd', { profile: 'web', package: '@scope/my-plugin' })}</code></pre>
         <p className={css.description}>{t('installGuideAddLocal')}</p>
-        <pre className={css.codeBlock}><code>dsh plugin --profile web add ~/dev/my-plugin</code></pre>
+        <pre className={css.codeBlock}><code>{t('installGuideAddLocal', { profile: 'web', path: '~/dev/my-plugin' })}</code></pre>
         <p className={css.description}>{t('installGuideAddGit')}</p>
-        <pre className={css.codeBlock}><code>dsh plugin --profile web add github:owner/repo</code></pre>
+        <pre className={css.codeBlock}><code>{t('installGuideAddGit', { profile: 'web' })}</code></pre>
       </section>
 
       <section className={css.group}>
         <h3 className={css.heading}>{t('installGuideRemoveHeading')}</h3>
         <p className={css.description}>{t('installGuideRemoveCmd')}</p>
-        <pre className={css.codeBlock}><code>dsh plugin --profile web remove @scope/my-plugin</code></pre>
+        <pre className={css.codeBlock}><code>{t('installGuideRemoveCmd', { profile: 'web', package: '@scope/my-plugin' })}</code></pre>
       </section>
 
       <p className={css.note}>{t('installGuideProfileNote')}</p>

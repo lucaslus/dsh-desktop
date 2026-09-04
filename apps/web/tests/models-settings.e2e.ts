@@ -25,7 +25,7 @@ import {
 } from './scaffold.ts'
 import { ZH_BROWSER_LOCALE, saveFailureShot } from './support.ts'
 
-const SNAPSHOT_DIR = fileURLToPath(new URL('./snapshots/models-settings', import.meta.url))
+const SNAPSHOT_DIR = fileURLToPath(new URL('./expected/models-settings', import.meta.url))
 const EMPTY_EXPECTED = join(SNAPSHOT_DIR, 'empty.expected.md')
 const CONFIGURED_EXPECTED = join(SNAPSHOT_DIR, 'configured.expected.md')
 const DECLARED_EXPECTED = join(SNAPSHOT_DIR, 'declared.expected.md')
@@ -47,7 +47,7 @@ describe('web e2e: Models settings page configures a dormant provider', () => {
     // The scenario asserts the shipped Chinese copy, so the browser asks for it.
     page = await browser.newPage({ viewport: { width: 1680, height: 1000 }, locale: ZH_BROWSER_LOCALE })
     tripwire = watchConsole(page)
-    await page.goto(scaffold.baseUrl, { waitUntil: 'load' })
+    await page.goto(scaffold.authenticatedUrl, { waitUntil: 'load' })
     await page.waitForSelector('[class*="frame"]', { timeout: 30_000 })
   }, 120_000)
 
@@ -70,13 +70,14 @@ describe('web e2e: Models settings page configures a dormant provider', () => {
     // The button enables once the dormant catalog lands in the join.
     await expect.poll(async () => add.isEnabled(), { timeout: 10_000 }).toBe(true)
     await add.click()
-    const pick = dialog.getByLabel('提供方')
-    await pick.waitFor({ timeout: 10_000 })
-    await expect.poll(async () => pick.locator('option').count(), { timeout: 10_000 }).toBeGreaterThan(30)
-    const options = await pick.locator('option').allTextContents()
+    const pick = dialog.getByRole('button', { name: '提供方', exact: true })
+    await pick.click()
+    const menu = page.getByRole('menu')
+    await expect.poll(async () => menu.getByRole('menuitem').count(), { timeout: 10_000 }).toBeGreaterThan(30)
+    const options = await menu.getByRole('menuitem').allTextContents()
     expect(options).toContain('anthropic')
     expect(options).toContain('minimax-cn')
-    await pick.selectOption('minimax-cn')
+    await menu.getByRole('menuitem', { name: 'minimax-cn', exact: true }).click()
     await dialog.getByRole('textbox', { name: 'API 密钥', exact: true }).waitFor({ timeout: 10_000 })
     const snapshot = await captureStableAria(page, '[role="dialog"]', scaffold.workspaceCwd)
     await compareOrRefreshGolden(EMPTY_EXPECTED, snapshot, MODE)
@@ -179,7 +180,7 @@ describe('web e2e: Models settings page configures a dormant provider', () => {
     expect(tripwire.pageErrors).toEqual([])
   }, 60_000)
 
-  it('selects and clears the discovered model catalog in one action', async () => {
+  it('filters the discovered model catalog and clears hidden selections', async () => {
     onTestFailed(() => saveFailureShot(page, 'web-e2e-models-picker'))
     const settingsDialog = page.getByRole('dialog', { name: '设置' })
     await settingsDialog.getByRole('button', { name: '编辑 minimax-cn' }).click()
@@ -195,11 +196,20 @@ describe('web e2e: Models settings page configures a dormant provider', () => {
       Array.from({ length: count }, () => true),
     )
 
+    const search = picker.getByRole('searchbox', { name: '搜索模型' })
+    await search.fill('highspeed')
+    await expect.poll(async () => boxes.count()).toBe(1)
     await picker.getByRole('button', { name: '取消全选' }).click()
     expect(await boxes.evaluateAll(nodes => nodes.map(node => (node as HTMLInputElement).checked))).toEqual(
-      Array.from({ length: count }, () => false),
+      [false],
     )
+
+    await search.fill('')
+    await expect.poll(async () => boxes.count()).toBe(count)
+    const restored = await boxes.evaluateAll(nodes => nodes.map(node => (node as HTMLInputElement).checked))
+    expect(restored).toEqual(Array.from({ length: count }, () => false))
     await picker.getByRole('button', { name: '全选' }).waitFor()
+    await picker.getByRole('button', { name: '全选' }).click()
     const snapshot = await captureStableAria(
       page,
       '[role="dialog"][aria-label="选择要添加的模型"]',
@@ -207,7 +217,6 @@ describe('web e2e: Models settings page configures a dormant provider', () => {
     )
     await compareOrRefreshGolden(MODEL_PICKER_EXPECTED, snapshot, MODE)
 
-    await picker.getByRole('button', { name: '全选' }).click()
     expect(await boxes.evaluateAll(nodes => nodes.map(node => (node as HTMLInputElement).checked))).toEqual(
       Array.from({ length: count }, () => true),
     )
@@ -223,6 +232,8 @@ describe('web e2e: Models settings page configures a dormant provider', () => {
     await declare.click()
     await dialog.getByLabel('Provider ID').fill('acme-gateway')
     await dialog.getByLabel('显示名称').fill('Acme Gateway')
+    await dialog.getByRole('button', { name: '品牌图标', exact: true }).click()
+    await page.getByRole('menuitem', { name: 'Kimi / Moonshot AI', exact: true }).click()
     await dialog.getByLabel('API 地址').fill('https://gateway.acme.example/v1')
     // No reasoning effort on a provider card at all: effort is a per-model
     // capability, the models under one provider disagree about it, and a
@@ -236,6 +247,7 @@ describe('web e2e: Models settings page configures a dormant provider', () => {
     await row.waitFor({ timeout: 10_000 })
     const document = await readFile(join(scaffold.harnessHome, 'settings.yaml'), 'utf8')
     expect(document).toContain('acme-gateway:')
+    expect(document).toContain('brandIcon: moonshotai')
 
     // The tag follows the adapter's installed catalog: this route is in no
     // catalog, while minimax-cn is — even though both now have profiles.
@@ -261,6 +273,7 @@ describe('web e2e: Models settings page configures a dormant provider', () => {
     expect(await protocol.inputValue()).toBe('openai-completions')
     const name = dialog.getByLabel('显示名称', { exact: true })
     expect(await name.inputValue()).toBe('Acme Gateway')
+    expect(await dialog.getByRole('button', { name: '品牌图标', exact: true }).textContent()).toBe('Kimi / Moonshot AI')
     const snapshot = await captureStableAria(page, '[role="dialog"]', scaffold.workspaceCwd)
     await compareOrRefreshGolden(DECLARED_EDIT_EXPECTED, snapshot, MODE)
 

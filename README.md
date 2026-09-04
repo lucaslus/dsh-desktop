@@ -8,7 +8,7 @@ DeepSeek Harness Desktop is a macOS and Fedora desktop app for [DeepSeek Harness
 
 ## Key enhancements
 
-DeepSeek Harness Desktop brings native desktop ergonomics and usability improvements while maintaining 100% compatibility with upstream DeepSeek Harness:
+DeepSeek Harness Desktop brings native desktop ergonomics and usability improvements to upstream DeepSeek Harness. The upstream project is in developer preview and may introduce compatibility-breaking changes. Review the [safety notice](SAFETY.md) before running it.
 
 - 🖥️ **Native macOS and Fedora apps with zero-config setup**: DMG and RPM installers include the runtime—no git clone or Node.js environment configuration required.
 - 🔍 **Model search & instant filtering**: Real-time search with smooth 10px rounded corners directly inside the Model Selector dropdown, making it effortless to find and switch models across dozens of configured providers.
@@ -40,6 +40,7 @@ Custom providers are not limited to a generic gateway icon. In **Customized sett
 
 ![Custom provider brand picker](docs/images/custom-provider-brand-picker.png)
 
+<a id="run-from-source"></a>
 ## Build installers yourself
 
 For a DMG, run this on macOS with Node.js 24+:
@@ -77,6 +78,7 @@ The release workflow builds separate unsigned Apple Silicon and Intel DMGs and Z
 
 This project is a desktop-oriented fork of DeepSeek Harness. The upstream project supplies the harness, Web UI, and plugin architecture; this fork carries the macOS and Fedora desktop shells and release workflow. Upstream source: [deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness).
 
+<a id="run"></a>
 ## Development
 
 Read the [development guide](docs/development.md) and [architecture documentation](docs/architecture.md). For agents, follow [AGENTS.md](AGENTS.md).

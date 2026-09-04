@@ -13,6 +13,8 @@
 
 import type { Context, FiberState } from '@deepseek-ai/cordis'
 import type {} from '@deepseek-ai/cordis-plugin-loader'
+// Type-only: the optional agent-preset roster resolved through `ctx.get`.
+import type {} from '@deepseek-ai/dsh-agent-presets'
 import { TypertRemoteService, Remote } from '@deepseek-ai/dsh-typert-protocol'
 import { dshHomePath } from '@deepseek-ai/dsh-home-paths'
 import { existsSync, mkdirSync, symlinkSync } from 'node:fs'
@@ -23,6 +25,7 @@ import { dirname, join, resolve } from 'node:path'
 // Typert-generated ./typert and ./remote artifacts import Zod at runtime.
 import type {} from 'zod'
 import type {
+  AgentPresetPluginGroup,
   PluginEntryId,
   PluginFiberPhase,
   PluginInventoryEntry,
@@ -99,10 +102,16 @@ export class PluginInventoryGateway extends TypertRemoteService {
    * Read the Loader directly on every call. Cordis's internal plugin/status
    * events already maintain Entry.fiber and Fiber.state, so a second cache
    * would only add another lifecycle truth to keep synchronized.
-   * @returns Current non-group Loader entries in Loader order.
+   *
+   * When an agent-preset roster is composed, the snapshot also carries each
+   * preset's composition rows, because those rows — not the Loader's own
+   * entries — are where a deployment that mounts the roster runs its
+   * model-facing plugins.
+   * @returns Current non-group Loader entries in Loader order, with per-preset
+   * compositions when a roster is composed.
    */
   @Remote('list')
-  list(): PluginInventorySnapshot {
+  async list(): Promise<PluginInventorySnapshot> {
     const entries: PluginInventoryEntry[] = []
     for (const entry of this.ctx.loader.entries()) {
       if (entry.options.group) continue
@@ -113,7 +122,18 @@ export class PluginInventoryGateway extends TypertRemoteService {
         fiberPhase: entry.fiber === undefined ? null : FIBER_PHASE[entry.fiber.state],
       })
     }
-    return { entries }
+    const presets = this.ctx.get('agentPresets')
+    if (presets === undefined) return { entries }
+    const agentPresets: AgentPresetPluginGroup[] = (await presets.compositionInventory()).map(
+      composition => ({
+        ...composition,
+        rows: composition.rows.map(({ fiberState, ...row }) => ({
+          ...row,
+          fiberPhase: fiberState === undefined ? null : FIBER_PHASE[fiberState],
+        })),
+      }),
+    )
+    return { entries, agentPresets }
   }
 
   /**
@@ -266,11 +286,17 @@ function expandHomedir(pathStr: string): string {
   return pathStr
 }
 
+/** Install a CLI launcher for the running Electron distribution. */
 export class CliInstallGateway extends TypertRemoteService {
   constructor(ctx: Context) {
     super(ctx, 'cliInstall')
   }
 
+  /**
+   * Write an executable launcher pointing to this Electron runtime.
+   * @param request - optional destination directory; defaults to ~/.local/bin.
+   * @returns written path, or an unsupported-runtime or filesystem failure.
+   */
   @Remote('install')
   async install(request: { dir?: string }): Promise<CliInstallResult> {
     const electronBinary = process.env.DSH_ELECTRON_BINARY
@@ -298,8 +324,12 @@ ELECTRON_RUN_AS_NODE=1 exec "${electronBinary}" "${binEntry}" "$@"
     }
   }
 
+  /**
+   * Inspect the default CLI launcher without changing the filesystem.
+   * @returns runtime support and existence of the default launcher path.
+   */
   @Remote('status')
-  async status(): Promise<CliInstallStatus> {
+  status(): CliInstallStatus {
     const electronBinary = process.env.DSH_ELECTRON_BINARY
     const binEntry = process.env.DSH_HARNESS_BIN_ENTRY
     if (!electronBinary || !binEntry) {

@@ -8,7 +8,7 @@ DeepSeek Harness Desktop 是 [DeepSeek Harness](https://github.com/deepseek-ai/d
 
 ## 核心新增能力
 
-DeepSeek Harness Desktop 在保持与官方 DeepSeek Harness 100% 架构兼容的同时，针对桌面端交互与易用性做了全方位增强：
+DeepSeek Harness Desktop 为上游 DeepSeek Harness 提供原生桌面交互和易用性增强。上游项目处于开发者预览阶段，可能引入不兼容变更。运行前请阅读[安全提示](SAFETY.zh.md)。
 
 - 🖥️ **原生 macOS 与 Fedora 应用，零配置开箱即用**：DMG 与 RPM 安装包内置完整运行时，用户无需 clone 源码或配置 Node.js 环境。
 - 🔍 **模型搜索与实时快速过滤**：在聊天输入框的模型下拉选择面板中内置无边框搜索框与 10px 柔和圆角，轻松在数十个 Provider 和大量模型中秒级过滤与切换。
@@ -40,6 +40,7 @@ DeepSeek Harness Desktop 在保持与官方 DeepSeek Harness 100% 架构兼容�
 
 ![自定义 Provider 品牌图标选择器](docs/images/custom-provider-brand-picker.png)
 
+<a id="run-from-source"></a>
 ## 自行构建安装包
 
 要构建 DMG，请在安装 Node.js 24+ 的 macOS 上运行：
@@ -77,6 +78,7 @@ sudo dnf install ./apps/electron/dist/release/*.rpm
 
 本项目是面向桌面端的 DeepSeek Harness fork。upstream 项目提供 harness、Web UI 和插件架构；本 fork 维护 macOS 与 Fedora 桌面 shell 和发布工作流。upstream 源码：[deepseek-ai/deepseek-harness](https://github.com/deepseek-ai/deepseek-harness)。
 
+<a id="run"></a>
 ## 开发
 
 请阅读[开发指南](docs/development.zh.md)和[架构文档](docs/architecture.zh.md)。面向 agent，请遵循 [AGENTS.md](AGENTS.md)。

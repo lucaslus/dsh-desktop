@@ -4,6 +4,8 @@ import { describe, expect, it } from 'vitest'
 import {
   checkExperimentalDependencyIsolation,
   checkExperimentalManifest,
+  checkWorkspaceManifest,
+  expectedDshPackageFiles,
   type WorkspaceManifest,
 } from './check-workspace-constraints.ts'
 
@@ -71,6 +73,37 @@ describe('experimental workspace constraints', () => {
 
     expect(checkExperimentalDependencyIsolation(manifests)).toEqual([
       '@deepseek-ai/dsh-python-runtime: dependencies.@deepseek-ai/dsh-experimental-prototype must not reference an experimental package',
+    ])
+  })
+})
+
+describe('package payload constraints', () => {
+  it('requires the Electron staging manifest to stay private without exempting other apps', () => {
+    const desktop = { dir: 'apps/electron', manifest: { name: 'deepseek-harness-desktop-electron', private: true } }
+    expect(checkWorkspaceManifest(desktop)).toEqual([])
+    expect(checkWorkspaceManifest({ ...desktop, manifest: { ...desktop.manifest, private: false } }))
+      .toContain('apps/electron/package.json: deepseek-harness-desktop-electron: package.json must set "private": true')
+    expect(checkWorkspaceManifest({ ...desktop, dir: 'apps/other' }).some(error => error.includes('release member must not set "private"')))
+      .toBe(true)
+  })
+
+  it('rejects experimental plugins in the shipped Electron runtime', () => {
+    expect(checkExperimentalDependencyIsolation([experimental, {
+      dir: 'apps/electron',
+      manifest: { name: 'deepseek-harness-desktop-electron', dependencies: { [experimental.manifest.name!]: 'workspace:^' } },
+    }])).toEqual([
+      'deepseek-harness-desktop-electron: dependencies.@deepseek-ai/dsh-experimental-prototype must not reference an experimental package',
+    ])
+  })
+
+  it('includes a declared profile patch without a package-name allowlist', () => {
+    expect(expectedDshPackageFiles({
+      name: '@deepseek-ai/dsh-private-profile',
+      dsh: { bundle: { patch: './cordis.patch.yml' } },
+    })).toEqual([
+      'lib/index.js',
+      'cordis.patch.yml',
+      'lib/types/**/*.d.ts',
     ])
   })
 })

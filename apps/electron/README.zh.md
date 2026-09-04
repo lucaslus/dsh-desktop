@@ -2,7 +2,7 @@
 
 [English](README.md) | 中文
 
-本目录用于构建自包含的 macOS 与 Fedora 桌面应用。每个应用都把生产环境 Harness 的完整依赖闭包嵌入 Electron shell，因此用户无需克隆仓库、安装 Node.js 或执行本地构建即可安装。
+本目录用于构建自包含的 macOS 与 Fedora 桌面应用。每个应用都把生产环境 Harness 的完整依赖闭包嵌入 Electron shell，因此用户无需克隆仓库、安装 Node.js 或执行本地构建即可安装。暂存流程通过持续维护的 `dsh-python-runtime-closure` 清单提供 CLI 动态加载的插件及其必需的 peer 依赖。
 
 ## 本地验证
 
@@ -10,7 +10,7 @@
 
 ```bash
 pnpm install --frozen-lockfile
-pnpm run build
+DSH_CLIENT_TITLE='DSH Desktop' pnpm run build
 node apps/electron/scripts/package-mac.mjs
 ```
 
@@ -19,7 +19,7 @@ node apps/electron/scripts/package-mac.mjs
 ```bash
 sudo dnf install rpm-build libxcrypt-compat
 pnpm install --frozen-lockfile
-pnpm run build
+DSH_CLIENT_TITLE='DSH Desktop' pnpm run build
 node apps/electron/scripts/package-linux.mjs
 ```
 
@@ -41,9 +41,11 @@ node apps/electron/scripts/package-linux.mjs
 pnpm run dev:electron
 ```
 
-该命令会先构建一次 Web shell，监视所有客户端插件，启动 Electron 窗口，并直接从 worktree 运行 Harness Host。客户端改动会在已打开的窗口中热更新。Electron 主进程或 Host／运行时源码改动会重启开发窗口；Web shell 改动会先重新构建，再重启窗口。在终端按 `Ctrl+C` 可停止 Electron 及其所有监视进程。嵌入式 Host 会传入 `--no-open`，因此环回 Web URL 只会载入 Electron，不会交给系统浏览器。
+该命令会先构建一次 Web shell，监视所有客户端插件，启动 Electron 窗口，并直接从 worktree 运行 Harness Host。客户端改动会在已打开的窗口中热更新。Electron 主进程或 Host／运行时源码改动会重启开发窗口；Web shell 改动会先重新构建，再重启窗口。在终端按 `Ctrl+C` 可停止 Electron 及其所有监视进程。嵌入式 Host 会传入 `--no-open`，因此环回 Web URL 只会载入 Electron，不会交给系统浏览器。桌面壳保留包含 token 的完整 URL，由 Web 应用将该 token 换取为已认证会话。
 
 ## 发布约定
+
+私有暂存工作区不参与上游 npm 发布族；桌面版本与 `electron-v` 标签独立于内嵌的 Harness 版本。
 
 推送名为 `electron-v<version>` 的标签会启动 `.github/workflows/electron-release.yml`。工作流分别构建 Apple Silicon 与 Intel macOS 应用，以及 arm64 与 x64 Fedora RPM。每个 RPM 都会先在 Fedora 44 容器中完成安装与运行验证，随后工作流创建包含 DMG、ZIP 和 RPM 产物的 GitHub Release 草稿。
 

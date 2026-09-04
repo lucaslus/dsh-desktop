@@ -2,7 +2,7 @@
 
 English | [中文](README.zh.md)
 
-This directory builds self-contained macOS and Fedora desktop applications. Each application embeds the production Harness dependency closure in an Electron shell, so a person can install it without cloning the repository, installing Node.js, or running a local build.
+This directory builds self-contained macOS and Fedora desktop applications. Each application embeds the production Harness dependency closure in an Electron shell, so a person can install it without cloning the repository, installing Node.js, or running a local build. Staging uses the maintained `dsh-python-runtime-closure` manifest for the CLI's dynamically loaded plugins and required peers.
 
 ## Local verification
 
@@ -10,7 +10,7 @@ From the repository root on macOS:
 
 ```bash
 pnpm install --frozen-lockfile
-pnpm run build
+DSH_CLIENT_TITLE='DSH Desktop' pnpm run build
 node apps/electron/scripts/package-mac.mjs
 ```
 
@@ -19,7 +19,7 @@ From the repository root on Fedora:
 ```bash
 sudo dnf install rpm-build libxcrypt-compat
 pnpm install --frozen-lockfile
-pnpm run build
+DSH_CLIENT_TITLE='DSH Desktop' pnpm run build
 node apps/electron/scripts/package-linux.mjs
 ```
 
@@ -41,9 +41,11 @@ Run this on macOS or Linux from the repository root:
 pnpm run dev:electron
 ```
 
-The command builds the web shell once, watches all client plugins, starts an Electron window, and runs the Harness host directly from the workspace. Client changes hot-reload in the open window. Changes to the Electron main process or host/runtime sources restart the development window automatically; changes to the web shell rebuild it and then restart the window. Press `Ctrl+C` in the terminal to stop both Electron and its watchers. The embedded Host passes `--no-open`, so the loopback Web URL loads only inside Electron and is never handed to the system browser.
+The command builds the web shell once, watches all client plugins, starts an Electron window, and runs the Harness host directly from the workspace. Client changes hot-reload in the open window. Changes to the Electron main process or host/runtime sources restart the development window automatically; changes to the web shell rebuild it and then restart the window. Press `Ctrl+C` in the terminal to stop both Electron and its watchers. The embedded Host passes `--no-open`, so the loopback Web URL loads only inside Electron and is never handed to the system browser. The shell preserves the complete token-bearing URL; the Web app exchanges that token for its authenticated session.
 
 ## Release contract
+
+The private staging workspace is excluded from the upstream npm release family; desktop versions and `electron-v` tags are independent of the embedded Harness version.
 
 Pushing a tag named `electron-v<version>` starts `.github/workflows/electron-release.yml`. It builds separate Apple Silicon and Intel macOS applications plus arm64 and x64 Fedora RPMs. Each RPM is installed and exercised in a Fedora 44 container before the workflow creates a draft GitHub Release containing the DMG, ZIP, and RPM assets.
 

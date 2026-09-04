@@ -21,6 +21,9 @@ on:
 permissions:
   contents: read
 
+env:
+  DSH_CLIENT_TITLE: DSH Desktop
+
 jobs:
   macos-lifecycle:
     name: Verify macOS window lifecycle ${{ matrix.arch }}

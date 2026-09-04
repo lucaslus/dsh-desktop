@@ -8,6 +8,9 @@ on:
 permissions:
   contents: write
 
+env:
+  DSH_CLIENT_TITLE: DSH Desktop
+
 jobs:
   package-macos:
     name: Package macOS ${{ matrix.arch }}
