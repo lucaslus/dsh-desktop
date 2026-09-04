@@ -63,7 +63,7 @@ jobs:
       - name: Verify Linux window close and reopen
         run: |
           sudo apt-get install --no-install-recommends -y xvfb
-          xvfb-run --auto-servernum pnpm --filter deepseek-harness-desktop-electron run test:window-lifecycle
+          xvfb-run --auto-servernum node apps/electron/tests/window-lifecycle.mjs
 
       - name: Inspect RPM payload
         run: |

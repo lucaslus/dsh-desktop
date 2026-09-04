@@ -317,7 +317,7 @@ describe('Electron release workflow', () => {
     const windowSmoke = fedoraSteps.find(step => step.name === 'Verify Linux window close and reopen')
     if (typeof windowSmoke?.run !== 'string') throw new TypeError('Linux window smoke must define a command')
     expect(windowSmoke.run).toContain('xvfb-run --auto-servernum')
-    expect(windowSmoke.run).toContain('run test:window-lifecycle')
+    expect(windowSmoke.run).toContain('node apps/electron/tests/window-lifecycle.mjs')
 
     expect(release.needs).toEqual(['package-macos', 'package-fedora'])
     const releaseSteps = release.steps.filter(isRecord)
