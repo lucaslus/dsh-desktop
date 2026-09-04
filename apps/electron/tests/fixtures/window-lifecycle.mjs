@@ -53,7 +53,8 @@ async function run() {
     const fileMenu = Menu.getApplicationMenu().items.find(item => item.label === 'File')
     const closeItem = fileMenu.submenu.items.find(item => item.role === 'close')
     assert.equal(closeItem.getDefaultRoleAccelerator(), 'CommandOrControl+W')
-    const hidden = once(window, 'hide')
+    // macOS show/hide notifications follow occlusion changes, which can be coalesced in CI.
+    const closeRequested = once(window, 'close')
     if (process.platform === 'darwin') {
       // macOS executes native menu roles through AppKit, not MenuItem.click().
       phase = 'waiting for macOS window focus'
@@ -64,21 +65,22 @@ async function run() {
     } else {
       closeItem.click(undefined, window, undefined)
     }
-    phase = 'waiting for the Close Window action to hide the window'
-    await hidden
+    phase = 'waiting for the native Close Window request'
+    await closeRequested
+    assert.equal(window.isDestroyed(), false)
     assert.equal(window.isVisible(), false)
     assert.equal((await fetch(hostURL)).ok, true)
     console.log('Close Window menu: window hidden; local host still reachable.')
 
     phase = 'waiting for second-instance reopening'
-    const shown = once(window, 'show')
+    const reopened = once(app, 'second-instance')
     const secondary = spawn(process.execPath, [import.meta.filename, '--secondary'], {
       env: process.env,
       stdio: 'ignore',
     })
     const secondaryExit = once(secondary, 'exit')
     try {
-      await shown
+      await reopened
       const [code] = await secondaryExit
       assert.equal(code, 0)
     } finally {
@@ -88,6 +90,7 @@ async function run() {
       }
     }
     assert.equal(BrowserWindow.getAllWindows().length, 1)
+    assert.equal(window.isVisible(), true)
     assert.equal(window.webContents, contents)
     assert.equal(contents.getURL(), hostURL)
     console.log('Launch again: original window restored; second process exited.')

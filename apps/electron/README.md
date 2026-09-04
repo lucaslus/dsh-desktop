@@ -31,7 +31,7 @@ The build machine needs Node.js 24 or later and Corepack. The repository pins pn
 
 On macOS and Linux, the window close button and **File → Close Window** hide the window without quitting the application. Running tasks, the local Host, and unsent input stay alive. Click the Dock icon on macOS or launch the application again on Linux to restore the same window. No system tray is required. Close Window uses `⌘W` on macOS and `Ctrl+W` on Linux; **Quit** (`⌘Q` / `Ctrl+Q`) exits the application and stops its Host.
 
-After packaging or staging the runtime, run `node apps/electron/tests/window-lifecycle.mjs` in a graphical session to replay the keyless native lifecycle snapshot. It uses isolated application data and the real staged Host. Linux CI runs the snapshot under Xvfb on both architectures; each release also runs it on both macOS architectures. This does not replace manual checks under Fedora desktop compositors.
+After packaging or staging the runtime, run `node apps/electron/tests/window-lifecycle.mjs` in a graphical session to replay the keyless native lifecycle snapshot. It uses isolated application data and the real staged Host. Desktop branch and release CI run the snapshot on both macOS and Linux architectures, using Xvfb on Linux. This does not replace manual checks under Fedora desktop compositors.
 
 ## Development
 

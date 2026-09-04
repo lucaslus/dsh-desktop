@@ -31,7 +31,7 @@ node apps/electron/scripts/package-linux.mjs
 
 在 macOS 和 Linux 上，窗口关闭按钮和 **File → Close Window** 只隐藏窗口，不退出应用。正在运行的任务、本地 Host 和未发送的输入都会保留。在 macOS 上点击 Dock 图标，或在 Linux 上再次启动应用，即可恢复同一个窗口，无需系统托盘。Close Window 的快捷键在 macOS 上是 `⌘W`，在 Linux 上是 `Ctrl+W`；**Quit**（`⌘Q` / `Ctrl+Q`）才会退出应用并停止 Host。
 
-完成打包或暂存运行时后，在图形会话中运行 `node apps/electron/tests/window-lifecycle.mjs`，即可重放无需模型密钥的原生生命周期快照。它使用隔离的应用数据和真实的暂存 Host。Linux CI 会在两种架构上通过 Xvfb 运行快照；每次发布还会在两种 macOS 架构上运行快照。这不能替代 Fedora 桌面合成器下的手动检查。
+完成打包或暂存运行时后，在图形会话中运行 `node apps/electron/tests/window-lifecycle.mjs`，即可重放无需模型密钥的原生生命周期快照。它使用隔离的应用数据和真实的暂存 Host。桌面应用的分支与发布 CI 都会在 macOS 和 Linux 的两种架构上运行快照，Linux 使用 Xvfb。这不能替代 Fedora 桌面合成器下的手动检查。
 
 ## 开发
 

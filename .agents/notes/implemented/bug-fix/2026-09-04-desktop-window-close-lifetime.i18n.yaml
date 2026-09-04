@@ -2,5 +2,5 @@
 # side as of the last confirmed-consistent state. Both languages carry equal authority;
 # after editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write .agents/notes/implemented/bug-fix/2026-09-04-desktop-window-close-lifetime.md
-2026-09-04-desktop-window-close-lifetime.md: 52a53529d1ed065e8bfdb7affcacc77c2e9d7cbc
-2026-09-04-desktop-window-close-lifetime.zh.md: 321218d2f646ef4d9d6bf5cb1169dbfe736d3d75
+2026-09-04-desktop-window-close-lifetime.md: 01f39bf79b9127de5e508fbef3e5a30159b1f98e
+2026-09-04-desktop-window-close-lifetime.zh.md: 1c1052375d0258b8a26c93bedaa936039909b4ca
