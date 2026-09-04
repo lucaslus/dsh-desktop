@@ -81,7 +81,8 @@
     },
     "apps/electron": {
       "entry": [
-        "scripts/copy-harness-runtime.mjs"
+        "scripts/copy-harness-runtime.mjs",
+        "tests/fixtures/window-lifecycle.mjs"
       ],
       "ignore": [
         "scripts/copy-harness-runtime.d.mts",
