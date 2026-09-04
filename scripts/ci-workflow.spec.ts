@@ -277,6 +277,21 @@ describe('E2B e2e workflow', () => {
 })
 
 describe('Electron release workflow', () => {
+  it.each([
+    ['.github/workflows/electron-release.yml', 'package-fedora'],
+    ['.github/workflows/electron-fedora.yml', 'rpm'],
+  ])('configures the Electron sandbox for Linux lifecycle tests in %s', (path, jobName) => {
+    const job = workflowJob(loadWorkflow(path), jobName)
+    if (!Array.isArray(job.steps)) throw new TypeError('Linux workflow must define steps')
+    const smoke = job.steps.filter(isRecord).find(step => step.name === 'Verify Linux window close and reopen')
+    if (typeof smoke?.run !== 'string') throw new TypeError('Linux window smoke must define a command')
+    expect(smoke.run).toContain('node -e \'require("./apps/electron/node_modules/electron")\'')
+    expect(smoke.run).toContain('sudo chown root:root apps/electron/node_modules/electron/dist/chrome-sandbox')
+    expect(smoke.run).toContain('sudo chmod 4755 apps/electron/node_modules/electron/dist/chrome-sandbox')
+    expect(smoke.run.indexOf('chmod 4755')).toBeLessThan(smoke.run.indexOf('xvfb-run'))
+    expect(smoke.run).not.toContain('--no-sandbox')
+  })
+
   it('publishes matching native macOS and Fedora installers after Fedora 44 smoke coverage', () => {
     const workflow = loadWorkflow('.github/workflows/electron-release.yml')
     const macOS = workflowJob(workflow, 'package-macos')
