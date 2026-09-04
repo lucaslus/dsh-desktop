@@ -6,10 +6,13 @@
   "main": "app/main.mjs",
   "scripts": {
     "dev": "node scripts/dev.mjs",
+    "test:window-lifecycle": "node tests/window-lifecycle.mjs",
     "stage-runtime": "node scripts/stage-runtime.mjs",
-    "package:mac": "node scripts/package-mac.mjs",
-    "package:mac:arm64": "node scripts/package-mac.mjs arm64",
-    "package:mac:x64": "node scripts/package-mac.mjs x64"
+    "package:mac": "node scripts/package.mjs darwin",
+    "package:mac:arm64": "node scripts/package.mjs darwin arm64",
+    "package:mac:x64": "node scripts/package.mjs darwin x64",
+    "package:linux": "node scripts/package.mjs linux",
+    "package:linux:x64": "node scripts/package.mjs linux x64"
   },
   "dependencies": {
     "@deepseek-ai/dsh": "workspace:^",

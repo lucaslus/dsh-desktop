@@ -1,11 +1,10 @@
 import { spawn } from 'node:child_process'
 import { join } from 'node:path'
+import { resolveReleaseTarget } from './release-target.mjs'
 
-const arch = process.argv[2] ?? process.arch
-if (!['arm64', 'x64'].includes(arch)) {
-  throw new Error(`Unsupported macOS architecture: ${arch}`)
-}
-
+const platform = process.argv[2] ?? process.platform
+const arch = process.argv[3] ?? process.arch
+const target = resolveReleaseTarget(platform, arch)
 const electronDirectory = join(import.meta.dirname, '..')
 
 function run(command, args, env = process.env) {
@@ -16,12 +15,13 @@ function run(command, args, env = process.env) {
   })
 }
 
-await run(process.execPath, ['scripts/stage-runtime.mjs', arch])
+await run(process.execPath, ['scripts/stage-runtime.mjs', target.platform, target.arch])
 
-// Public DMGs are intentionally unsigned. Disable keychain discovery so a
-// developer's unrelated local certificate never changes a release artifact.
-const releaseEnvironment = { ...process.env, CSC_IDENTITY_AUTO_DISCOVERY: 'false' }
+const releaseEnvironment = target.platform === 'darwin'
+  ? { ...process.env, CSC_IDENTITY_AUTO_DISCOVERY: 'false' }
+  : process.env
 await run(join(electronDirectory, 'node_modules', '.bin', 'electron-builder'), [
   '--config', 'electron-builder.yml',
-  '--mac', 'dmg', 'zip', `--${arch}`, '--publish', 'never',
+  ...target.builderArguments,
+  '--publish', 'never',
 ], releaseEnvironment)

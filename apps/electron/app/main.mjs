@@ -2,6 +2,12 @@ import { spawn } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 import { app, BrowserWindow, Menu, dialog, shell } from 'electron'
+import {
+  applicationMenuTemplate,
+  nativeWindowOptions,
+  needsInsetDragRegion,
+  updateInstallMessage,
+} from './platform.mjs'
 
 const readinessPattern = /dsh web: (http:\/\/127\.0\.0\.1:\d+)/
 const development = process.env.DSH_ELECTRON_DEV === '1'
@@ -24,6 +30,7 @@ let host
 let mainWindow
 let hostOutput = ''
 let hostReady = false
+let hostURL
 let quitting = false
 const releasesURL = 'https://github.com/lucaslus/dsh-desktop/releases'
 
@@ -89,9 +96,10 @@ function startHost() {
   host.stdout.on('data', chunk => {
     appendHostOutput(chunk)
     const ready = readinessPattern.exec(hostOutput)
-    if (!hostReady && ready?.[1] && mainWindow !== undefined) {
+    if (!hostReady && ready?.[1]) {
       hostReady = true
-      void mainWindow.loadURL(ready[1])
+      hostURL = ready[1]
+      void mainWindow?.loadURL(hostURL)
     }
   })
   host.stderr.on('data', appendHostOutput)
@@ -112,7 +120,7 @@ async function openReleases() {
     buttons: ['Open GitHub Releases', 'Cancel'],
     defaultId: 0,
     title: 'Install updates manually',
-    message: 'Download the matching DMG from GitHub Releases, then replace the app in Applications.',
+    message: updateInstallMessage(process.platform),
   })
   if (response === 0) await shell.openExternal(releasesURL)
 }
@@ -121,41 +129,57 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1240, height: 820, minWidth: 900, minHeight: 600,
     title: 'DeepSeek Harness', backgroundColor: '#1b1b1c',
-    // Match the native AppKit shell: content fills the transparent title bar,
-    // the traffic lights stay native, and no duplicate window title is shown.
-    titleBarStyle: 'hiddenInset',
+    ...nativeWindowOptions(process.platform),
     webPreferences: { contextIsolation: true, nodeIntegration: false, sandbox: true },
   })
-  mainWindow.webContents.on('dom-ready', () => {
+  const window = mainWindow
+  window.on('close', event => {
+    if (quitting) return
+    // Keep the renderer and local host alive, including unsent input and running tasks.
+    event.preventDefault()
+    window.hide()
+  })
+  window.on('closed', () => {
+    mainWindow = undefined
+  })
+  if (needsInsetDragRegion(process.platform)) mainWindow.webContents.on('dom-ready', () => {
     void mainWindow?.webContents.executeJavaScript(desktopChromeScript).catch(error => {
       console.error('Could not apply desktop window chrome:', error)
     })
   })
-  void mainWindow.loadFile(join(import.meta.dirname, 'splash.html'))
+  if (hostURL !== undefined) void window.loadURL(hostURL)
+  else void window.loadFile(join(import.meta.dirname, 'splash.html'))
 }
 
-app.whenReady().then(() => {
-  try {
-    createWindow()
-    startHost()
-    Menu.setApplicationMenu(Menu.buildFromTemplate([
-      {
-        label: 'DeepSeek Harness',
-        submenu: [
-          { role: 'about' }, { type: 'separator' },
-          { label: 'Check for Updates…', click: () => void openReleases() },
-          { type: 'separator' }, { role: 'quit' },
-        ],
-      },
-      { role: 'editMenu' }, { role: 'viewMenu' }, { role: 'windowMenu' },
-    ]))
-  } catch (error) {
-    void dialog.showMessageBox({ type: 'error', title: 'DeepSeek Harness could not start', message: String(error) })
-  }
-})
+function showMainWindow() {
+  if (quitting || !app.isReady()) return
+  if (mainWindow === undefined) createWindow()
+  if (mainWindow.isMinimized()) mainWindow.restore()
+  mainWindow.show()
+  mainWindow.focus()
+}
 
 app.on('before-quit', () => {
   quitting = true
   stopHost()
 })
-app.on('window-all-closed', () => app.quit())
+app.on('window-all-closed', () => {
+  // Only explicit Quit ends the app; activation can recreate a destroyed window.
+})
+app.on('activate', showMainWindow)
+app.on('second-instance', showMainWindow)
+
+if (!app.requestSingleInstanceLock()) {
+  app.quit()
+} else {
+  app.whenReady().then(() => {
+    try {
+      createWindow()
+      startHost()
+      const menu = applicationMenuTemplate(process.platform, () => void openReleases())
+      Menu.setApplicationMenu(Menu.buildFromTemplate(menu))
+    } catch (error) {
+      void dialog.showMessageBox({ type: 'error', title: 'DeepSeek Harness could not start', message: String(error) })
+    }
+  })
+}

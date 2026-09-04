@@ -1,4 +1,4 @@
-name: Electron macOS release
+name: Electron desktop release
 
 on:
   push:
@@ -10,15 +10,30 @@ permissions:
 
 jobs:
   package:
-    name: Package macOS ${{ matrix.arch }}
+    name: Package ${{ matrix.label }}
     strategy:
       fail-fast: false
       matrix:
         include:
           - arch: arm64
+            label: macOS arm64
+            platform: darwin
             runner: macos-14
+            assets: |
+              apps/electron/dist/release/*.dmg
+              apps/electron/dist/release/*.zip
           - arch: x64
+            label: macOS x64
+            platform: darwin
             runner: macos-15-intel
+            assets: |
+              apps/electron/dist/release/*.dmg
+              apps/electron/dist/release/*.zip
+          - arch: x64
+            label: Fedora Linux x86_64
+            platform: linux
+            runner: ubuntu-24.04
+            assets: apps/electron/dist/release/*.rpm
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 45
     steps:
@@ -43,20 +58,22 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Install RPM packaging tools
+        if: matrix.platform == 'linux'
+        run: sudo apt-get update && sudo apt-get install --yes rpm
+
       - name: Build web runtime
         run: pnpm run build
 
-      - name: Package unsigned DMG
-        run: node apps/electron/scripts/package-mac.mjs ${{ matrix.arch }}
+      - name: Package desktop application
+        run: node apps/electron/scripts/package.mjs ${{ matrix.platform }} ${{ matrix.arch }}
 
       - name: Upload release assets
         uses: actions/upload-artifact@v4
         with:
-          name: electron-macos-${{ matrix.arch }}
+          name: electron-${{ matrix.platform }}-${{ matrix.arch }}
           if-no-files-found: error
-          path: |
-            apps/electron/dist/release/*.dmg
-            apps/electron/dist/release/*.zip
+          path: ${{ matrix.assets }}
 
   release:
     name: Publish GitHub release
@@ -70,7 +87,7 @@ jobs:
       - name: Download release assets
         uses: actions/download-artifact@v4
         with:
-          pattern: electron-macos-*
+          pattern: electron-*
           path: apps/electron/dist/release
           merge-multiple: true
 
@@ -78,9 +95,10 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           # Publishing remains a deliberate maintainer action: validate the
-          # two architecture-specific DMGs before exposing them to users.
+          # two architecture-specific DMGs and the RPM before exposing them.
           draft: true
           generate_release_notes: true
           files: |
             apps/electron/dist/release/*.dmg
             apps/electron/dist/release/*.zip
+            apps/electron/dist/release/*.rpm

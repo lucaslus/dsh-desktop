@@ -1,9 +1,10 @@
 import { cp, rm } from 'node:fs/promises'
-import { join, resolve } from 'node:path'
+import { resolve } from 'node:path'
+import { harnessRuntimeDestination } from './release-target.mjs'
 
 export default async function copyHarnessRuntime(context) {
   const source = resolve(import.meta.dirname, '..', 'dist', 'harness')
-  const destination = join(context.appOutDir, `${context.packager.appInfo.productFilename}.app`, 'Contents', 'Resources', 'harness')
+  const destination = harnessRuntimeDestination(context)
 
   await rm(destination, { recursive: true, force: true })
   // The production deployment contains pnpm links. A release app must be

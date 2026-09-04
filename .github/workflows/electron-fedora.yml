@@ -1,0 +1,73 @@
+name: Electron Fedora
+
+on:
+  pull_request:
+    paths:
+      - 'apps/electron/**'
+      - 'apps/desktop/Resources/**'
+      - '.github/workflows/electron-fedora.yml'
+      - '.github/workflows/electron-release.yml'
+      - 'pnpm-lock.yaml'
+  push:
+    branches: [master]
+    paths:
+      - 'apps/electron/**'
+      - 'apps/desktop/Resources/**'
+      - '.github/workflows/electron-fedora.yml'
+      - '.github/workflows/electron-release.yml'
+      - 'pnpm-lock.yaml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rpm:
+    name: Build and inspect RPM
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.7.0
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies and RPM packaging tools
+        run: |
+          pnpm install --frozen-lockfile
+          sudo apt-get update
+          sudo apt-get install --yes rpm
+
+      - name: Build web runtime
+        run: pnpm run build
+
+      - name: Package Fedora RPM
+        run: node apps/electron/scripts/package.mjs linux x64
+
+      - name: Inspect RPM payload
+        run: |
+          rpm_path=$(find apps/electron/dist/release -maxdepth 1 -name '*.rpm' -print -quit)
+          test -n "$rpm_path"
+          rpm -qpl "$rpm_path" | grep -F '/resources/harness/node_modules/@deepseek-ai/dsh/lib/bin.js'
+
+      - name: Verify installation on Fedora
+        run: |
+          docker run --rm \
+            --volume "$PWD/apps/electron/dist/release:/release:ro" \
+            fedora:latest \
+            bash -euc 'dnf install --assumeyes /release/*.rpm && rpm --query deepseek-harness-desktop'
+
+      - name: Upload RPM for review
+        uses: actions/upload-artifact@v4
+        with:
+          name: electron-linux-x64
+          if-no-files-found: error
+          path: apps/electron/dist/release/*.rpm

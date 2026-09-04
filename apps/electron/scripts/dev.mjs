@@ -127,8 +127,8 @@ async function main() {
     }
   })
 
-  // macOS supports recursive FSEvents. The runner is macOS-only just like
-  // Electron packaging, so this deliberately avoids another watcher runtime.
+  // Supported release hosts provide recursive fs.watch under the Node engine
+  // range, so development uses the same watcher without another dependency.
   const sourceWatcher = watch(repositoryRoot, { recursive: true }, (_event, file) => {
     if (file !== null) scheduleRestart(join(repositoryRoot, file))
   })

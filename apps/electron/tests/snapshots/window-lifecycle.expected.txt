@@ -1,0 +1,7 @@
+Close during startup: window hidden; application running.
+Hidden startup: local host ready; page loaded.
+Activate: original window and renderer restored.
+Close Window menu: window hidden; local host still reachable.
+Launch again: original window restored; second process exited.
+Quit while hidden: window destroyed; application exiting.
+After Quit: local host stopped.

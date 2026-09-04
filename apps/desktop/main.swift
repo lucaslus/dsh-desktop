@@ -322,7 +322,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate {
         boot()
     }
 
-    func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { true }
+    func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { false }
+
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        if window.isMiniaturized { window.deminiaturize(nil) }
+        window.makeKeyAndOrderFront(nil)
+        return true
+    }
 
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
         teardownHost()
@@ -581,6 +587,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate {
             defer: false,
         )
         window.title = appDisplayName
+        window.isReleasedWhenClosed = false
         window.minSize = NSSize(width: 900, height: 600)
         window.setFrameAutosaveName(Self.mainWindowAutosaveName)
         window.center()
@@ -712,6 +719,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, WKNavigationDelegate {
         appMenu.addItem(.separator())
         appMenu.addItem(withTitle: "Quit", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
         appItem.submenu = appMenu
+
+        let fileItem = NSMenuItem()
+        mainMenu.addItem(fileItem)
+        let fileMenu = NSMenu(title: "File")
+        fileMenu.addItem(withTitle: "Close Window", action: #selector(NSWindow.performClose(_:)), keyEquivalent: "w")
+        fileItem.submenu = fileMenu
 
         let editItem = NSMenuItem()
         mainMenu.addItem(editItem)

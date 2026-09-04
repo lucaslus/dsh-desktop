@@ -10,6 +10,7 @@ directories:
   output: dist/release
 files:
   - main.mjs
+  - platform.mjs
   - splash.html
   - package.json
   # Harness is staged separately in Contents/Resources by afterPack. Do not
@@ -30,3 +31,17 @@ mac:
     - target: zip
 dmg:
   title: DeepSeek Harness
+linux:
+  category: Development
+  description: A plugin-based agent harness with a native desktop shell.
+  executableName: deepseek-harness
+  icon: ../desktop/Resources/icon.png
+  maintainer: DeepSeek Harness Desktop contributors
+  synopsis: DeepSeek Harness desktop application
+  syncDesktopName: true
+  target:
+    - target: rpm
+      arch:
+        - x64
+rpm:
+  packageName: deepseek-harness-desktop
