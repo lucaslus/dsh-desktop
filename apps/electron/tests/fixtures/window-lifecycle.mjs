@@ -5,8 +5,16 @@ import { once } from 'node:events'
 import { app, BrowserWindow, Menu } from 'electron'
 
 app.setPath('userData', process.env.DSH_WINDOW_TEST_PROFILE)
+let phase = 'starting the application'
 const timeout = setTimeout(() => {
-  console.error('Desktop window lifecycle timed out')
+  console.error('Desktop window lifecycle timed out:', {
+    phase,
+    active: process.platform === 'darwin' ? app.isActive() : undefined,
+    hidden: process.platform === 'darwin' ? app.isHidden() : undefined,
+    windows: BrowserWindow.getAllWindows().map(window => ({
+      id: window.id, visible: window.isVisible(), focused: window.isFocused(),
+    })),
+  })
   app.once('will-quit', () => app.exit(1))
   app.quit()
 }, 45_000)
@@ -32,6 +40,7 @@ async function run() {
     assert.equal(window.isVisible(), false)
     console.log('Close during startup: window hidden; application running.')
 
+    phase = 'waiting for the hidden host to load'
     const hostURL = await ready
     assert.equal((await fetch(hostURL)).ok, true)
     console.log(`HOST_URL ${hostURL}`)
@@ -47,17 +56,21 @@ async function run() {
     const hidden = once(window, 'hide')
     if (process.platform === 'darwin') {
       // macOS executes native menu roles through AppKit, not MenuItem.click().
+      phase = 'waiting for macOS window focus'
       app.focus({ steal: true })
       if (!window.isFocused()) await once(window, 'focus')
+      phase = 'dispatching the macOS Close Window action'
       Menu.sendActionToFirstResponder('performClose:')
     } else {
       closeItem.click(undefined, window, undefined)
     }
+    phase = 'waiting for the Close Window action to hide the window'
     await hidden
     assert.equal(window.isVisible(), false)
     assert.equal((await fetch(hostURL)).ok, true)
     console.log('Close Window menu: window hidden; local host still reachable.')
 
+    phase = 'waiting for second-instance reopening'
     const shown = once(window, 'show')
     const secondary = spawn(process.execPath, [import.meta.filename, '--secondary'], {
       env: process.env,
@@ -79,6 +92,7 @@ async function run() {
     assert.equal(contents.getURL(), hostURL)
     console.log('Launch again: original window restored; second process exited.')
 
+    phase = 'quitting the hidden application'
     window.close()
     app.once('will-quit', () => {
       assert.equal(window.isDestroyed(), true)

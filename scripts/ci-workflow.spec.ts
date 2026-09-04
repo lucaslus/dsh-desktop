@@ -277,6 +277,25 @@ describe('E2B e2e workflow', () => {
 })
 
 describe('Electron release workflow', () => {
+  it('checks both native macOS window lifecycles before tagging a release', () => {
+    const workflow = loadWorkflow('.github/workflows/electron-fedora.yml')
+    const macOS = workflowJob(workflow, 'macos-lifecycle')
+    expect(macOS.strategy).toMatchObject({
+      'fail-fast': false,
+      matrix: { include: [
+        { arch: 'arm64', runner: 'macos-14' },
+        { arch: 'x64', runner: 'macos-15-intel' },
+      ] },
+    })
+    expect(macOS.steps).toEqual(expect.arrayContaining([
+      expect.objectContaining({ run: 'pnpm run build' }),
+      expect.objectContaining({ run: 'node apps/electron/scripts/stage-runtime.mjs darwin ${{ matrix.arch }}' }),
+      expect.objectContaining({ run: 'node apps/electron/tests/window-lifecycle.mjs' }),
+    ]))
+    expect(workflow.on).toHaveProperty('pull_request')
+    expect(workflow.on).toHaveProperty('push.branches', ['**'])
+  })
+
   it.each([
     ['.github/workflows/electron-release.yml', 'package-fedora'],
     ['.github/workflows/electron-fedora.yml', 'rpm'],

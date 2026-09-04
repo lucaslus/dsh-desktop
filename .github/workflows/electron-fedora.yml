@@ -1,4 +1,4 @@
-name: Electron Fedora
+name: Electron desktop checks
 
 on:
   pull_request:
@@ -22,6 +22,44 @@ permissions:
   contents: read
 
 jobs:
+  macos-lifecycle:
+    name: Verify macOS window lifecycle ${{ matrix.arch }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: arm64
+            runner: macos-14
+          - arch: x64
+            runner: macos-15-intel
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.7.0
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build web runtime
+        run: pnpm run build
+
+      - name: Stage native Harness runtime
+        run: node apps/electron/scripts/stage-runtime.mjs darwin ${{ matrix.arch }}
+
+      - name: Verify window close and reopen
+        run: node apps/electron/tests/window-lifecycle.mjs
+
   rpm:
     name: Build and inspect RPM
     strategy:
