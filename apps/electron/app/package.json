@@ -1,7 +1,7 @@
 {
   "name": "deepseek-harness-desktop-app",
   "desktopName": "DeepSeek Harness",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "DeepSeek Harness desktop application",
   "author": "DeepSeek Harness Desktop contributors",
   "homepage": "https://github.com/lucaslus/dsh-desktop",
